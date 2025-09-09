@@ -57,160 +57,254 @@
     .col-md-6.mb-4
       .card
         .card-header
-          %h5.card-title Daily Summary
-        .card-body
-          .metric-item.mb-3
-            %h6 Today's Orders
-            .h3.text-primary#todayOrders
-          .metric-item.mb-3
-            %h6 Average Order Value
-            .h3.text-warning#avgOrderValue
-
-  .row
-    .col-md-6.mb-4
-      .card
-        .card-header
           %h5.card-title Product Performance Matrix
         .card-body
           #productMatrix.chart-container
-          
-    .col-md-6.mb-4
-      .card
-        .card-header
-          %h5.card-title Customer Cohort Analysis
-        .card-body
-          #cohortHeatmap.chart-container
 
-  .row
-    .col-md-4.mb-4
-      .card
-        .card-header
-          %h5.card-title Category Distribution
-        .card-body
-          #categoryTreemap.chart-container
+    -# .col-md-6.mb-4
+    -#   .card
+    -#     .card-header
+    -#       %h5.card-title Daily Summary
+    -#     .card-body
+    -#       .metric-item.mb-3
+    -#         %h6 Today's Orders
+    -#         .h3.text-primary#todayOrders
+    -#       .metric-item.mb-3
+    -#         %h6 Average Order Value
+    -#         .h3.text-warning#avgOrderValue
 
-    .col-md-4.mb-4
-      .card
-        .card-header
-          %h5.card-title Seasonal Patterns
-        .card-body
-          #seasonalRadar.chart-container
+  -# .row
+  -#   .col-md-6.mb-4
+  -#     .card
+  -#       .card-header
+  -#         %h5.card-title Customer Cohort Analysis
+  -#       .card-body
+  -#         #cohortHeatmap.chart-container
 
-    .col-md-4.mb-4
-      .card
-        .card-header
-          %h5.card-title Customer Retention
-        .card-body
-          #retentionFunnel.chart-container
+  -# .row
+  -#   .col-md-4.mb-4
+  -#     .card
+  -#       .card-header
+  -#         %h5.card-title Category Distribution
+  -#       .card-body
+  -#         #categoryTreemap.chart-container
 
-  .row
-    .col-12.mb-4
-      .card
-        .card-header.d-flex.justify-content-between.align-items-center
-          %h5.card-title Product Affinity Network
-          %select#affinityMetric.form-select.w-auto
-            %option{value: "frequency"} By Frequency
-            %option{value: "revenue"} By Revenue
-        .card-body
-          #affinityNetwork.chart-container
+  -#   .col-md-4.mb-4
+  -#     .card
+  -#       .card-header
+  -#         %h5.card-title Seasonal Patterns
+  -#       .card-body
+  -#         #seasonalRadar.chart-container
+
+  -#   .col-md-4.mb-4
+  -#     .card
+  -#       .card-header
+  -#         %h5.card-title Customer Retention
+  -#       .card-body
+  -#         #retentionFunnel.chart-container
+
+  -# .row
+  -#   .col-12.mb-4
+  -#     .card
+  -#       .card-header.d-flex.justify-content-between.align-items-center
+  -#         %h5.card-title Product Affinity Network
+  -#         %select#affinityMetric.form-select.w-auto
+  -#           %option{value: "frequency"} By Frequency
+  -#           %option{value: "revenue"} By Revenue
+  -#       .card-body
+  -#         #affinityNetwork.chart-container
 
 :javascript
+  // Debug: Log the data to see what we're working with
+  console.log('Monthly Stats Data:', #{(@monthly_stats || {}).to_json});
+  console.log('Top Products Data:', #{(@top_products || {}).to_json});
+  
   // Enhanced Revenue Chart with Animations
-  const revenueData = #{(@monthly_stats && @monthly_stats[:monthly_stats] || []).to_json};
-  const revenueChart = new ApexCharts(document.querySelector("#revenueChart"), {
-    series: [{
-      name: 'Revenue',
-      data: revenueData.map(d => d.revenue || 0)
-    }, {
-      name: 'Orders',
-      data: revenueData.map(d => d.order_count || 0)
-    }],
-    chart: {
-      type: 'area',
-      height: 350,
-      animations: {
-        enabled: true,
-        easing: 'easeinout',
-        speed: 800,
-        dynamicAnimation: {
+  const monthlyStatsData = #{(@monthly_stats || {}).to_json};
+  const revenueData = monthlyStatsData.monthly_stats || [];
+  
+  console.log('Revenue Data for Chart:', revenueData);
+  
+  if (revenueData.length > 0) {
+    const revenueChart = new ApexCharts(document.querySelector("#revenueChart"), {
+      series: [{
+        name: 'Revenue ($)',
+        data: revenueData.map(d => d.revenue || 0)
+      }, {
+        name: 'Orders',
+        data: revenueData.map(d => d.order_count || 0)
+      }],
+      chart: {
+        type: 'area',
+        height: 350,
+        animations: {
           enabled: true,
-          speed: 350
+          easing: 'easeinout',
+          speed: 800,
+          dynamicAnimation: {
+            enabled: true,
+            speed: 350
+          }
+        },
+        toolbar: {
+          show: true,
+          tools: {
+            download: true,
+            selection: true,
+            zoom: true,
+            zoomin: true,
+            zoomout: true,
+            pan: true
+          }
         }
       },
-      toolbar: {
-        show: true,
-        tools: {
-          download: true,
-          selection: true,
-          zoom: true,
-          zoomin: true,
-          zoomout: true,
-          pan: true
+      stroke: {
+        curve: 'smooth',
+        width: 2
+      },
+      fill: {
+        type: 'gradient',
+        gradient: {
+          shadeIntensity: 1,
+          opacityFrom: 0.7,
+          opacityTo: 0.3,
+          stops: [0, 90, 100]
+        }
+      },
+      dataLabels: {
+        enabled: false
+      },
+      xaxis: {
+        categories: revenueData.map(d => d.month || 'Unknown'),
+        title: {
+          text: 'Month'
+        }
+      },
+      yaxis: [{
+        title: {
+          text: 'Revenue ($)'
+        },
+        labels: {
+          formatter: function (val) {
+            return '$' + val.toLocaleString();
+          }
+        }
+      }, {
+        opposite: true,
+        title: {
+          text: 'Orders'
+        }
+      }],
+      tooltip: {
+        shared: true,
+        intersect: false,
+        y: [{
+          formatter: function (val) {
+            return '$' + val.toLocaleString();
+          }
+        }, {
+          formatter: function (val) {
+            return val + ' orders';
+          }
+        }]
+      },
+      colors: ['#008FFB', '#00E396']
+    });
+    revenueChart.render();
+  } else {
+    document.querySelector("#revenueChart").innerHTML = '<div class="alert alert-info">No revenue data available</div>';
+  }
+
+  // Product Performance Matrix - Enhanced Scatter Plot
+  const topProductsData = #{(@top_products || {}).to_json};
+  const productData = topProductsData.top_products || [];
+  
+  console.log('Product Data for Chart:', productData);
+  
+  if (productData && productData.length > 0) {
+    const productMatrix = new ApexCharts(document.querySelector("#productMatrix"), {
+      series: [{
+        name: 'Products',
+        data: productData.map(d => ({
+          x: d.units_sold || 0,
+          y: d.revenue || 0,
+          name: d.name || 'Unknown Product'
+        }))
+      }],
+      chart: {
+        type: 'scatter',
+        height: 350,
+        zoom: {
+          enabled: true,
+          type: 'xy'
+        },
+        toolbar: {
+          show: true
+        }
+      },
+      xaxis: {
+        title: { 
+          text: 'Units Sold',
+          style: {
+            fontSize: '14px',
+            fontWeight: 600
+          }
+        },
+        tickAmount: 10,
+      },
+      yaxis: {
+        title: { 
+          text: 'Revenue ($)',
+          style: {
+            fontSize: '14px',
+            fontWeight: 600
+          }
+        },
+        labels: {
+          formatter: function (val) {
+            return '$' + val.toLocaleString();
+          }
+        }
+      },
+      markers: {
+        size: productData.map(d => Math.max(5, Math.min(15, Math.sqrt((d.units_sold || 0) * (d.revenue || 0)) / 50))),
+        colors: ['#FF4560'],
+        strokeColors: '#fff',
+        strokeWidth: 2,
+        hover: {
+          size: undefined,
+          sizeOffset: 3
+        }
+      },
+      tooltip: {
+        custom: function({series, seriesIndex, dataPointIndex, w}) {
+          const product = productData[dataPointIndex];
+          const avgPrice = product.revenue && product.units_sold ? (product.revenue / product.units_sold) : 0;
+          return `
+            <div class="p-3" style="background: white; border: 1px solid #ccc; border-radius: 5px;">
+              <strong>${product.name || 'Unknown Product'}</strong><br/>
+              <span style="color: #008FFB;">Revenue: $${(product.revenue || 0).toLocaleString()}</span><br/>
+              <span style="color: #00E396;">Units Sold: ${(product.units_sold || 0).toLocaleString()}</span><br/>
+              <span style="color: #FEB019;">Avg Price: $${avgPrice.toFixed(2)}</span>
+            </div>
+          `;
+        }
+      },
+      grid: {
+        borderColor: '#e7e7e7',
+        row: {
+          colors: ['#f3f3f3', 'transparent'],
+          opacity: 0.5
         }
       }
-    },
-    stroke: {
-      curve: 'smooth'
-    },
-    fill: {
-      type: 'gradient',
-      gradient: {
-        shadeIntensity: 1,
-        opacityFrom: 0.7,
-        opacityTo: 0.3,
-        stops: [0, 90, 100]
-      }
-    },
-    dataLabels: {
-      enabled: false
-    },
-    xaxis: {
-      categories: revenueData.map(d => d.month)
-    }
-  });
-  revenueChart.render();
+    });
+    productMatrix.render();
+  } else {
+    document.querySelector("#productMatrix").innerHTML = '<div class="alert alert-info">No product data available</div>';
+  }
 
-  // Product Performance Matrix
-  const productData = #{(@top_products && @top_products[:top_products] || []).to_json};
-  const productMatrix = new ApexCharts(document.querySelector("#productMatrix"), {
-    series: [{
-      name: 'Revenue',
-      data: productData.map(d => d.revenue)
-    }],
-    chart: {
-      type: 'scatter',
-      height: 350,
-      zoom: {
-        enabled: true,
-        type: 'xy'
-      }
-    },
-    xaxis: {
-      title: { text: 'Units Sold' },
-      tickAmount: 10,
-    },
-    yaxis: {
-      title: { text: 'Revenue' }
-    },
-    markers: {
-      size: productData.map(d => Math.sqrt(d.units_sold) * 2)
-    },
-    tooltip: {
-      custom: function({series, seriesIndex, dataPointIndex, w}) {
-        const product = productData[dataPointIndex];
-        return `
-          <div class="p-2">
-            <strong>${product.name}</strong><br/>
-            Revenue: $${product.revenue}<br/>
-            Units: ${product.units_sold}<br/>
-            Avg Price: $${(product.revenue / product.units_sold).toFixed(2)}
-          </div>
-        `;
-      }
-    }
-  });
-  productMatrix.render();
-
+  // Commented out charts that are no longer displayed
+  /*
   // Cohort Analysis Heatmap
   const cohortData = #{(@customer_patterns && @customer_patterns[:spending_patterns] || []).to_json};
   const cohortHeatmap = new ApexCharts(document.querySelector("#cohortHeatmap"), {
@@ -291,5 +385,6 @@
     }]
   });
   retentionFunnel.render();
+  */
 
 != javascript_include_tag 'js/nl-analytics.js'

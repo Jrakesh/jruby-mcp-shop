@@ -174,6 +174,8 @@ const NLAnalytics = {
     },
 
     createRetentionAnalysis(data) {
+        console.log('Creating retention analysis with data:', data);
+        
         const chartId = 'retentionChart_' + Date.now();
         const html = `
             <div class="card mb-4">
@@ -186,23 +188,38 @@ const NLAnalytics = {
 
         setTimeout(() => {
             const chartElement = document.getElementById(chartId);
-            if (!chartElement) return;
+            if (!chartElement) {
+                console.error('Chart element not found:', chartId);
+                return;
+            }
 
+            console.log('Processing retention data:', data);
+            
             const groupedData = {};
             if (Array.isArray(data)) {
                 data.forEach(p => {
                     const count = p.order_count || 0;
                     groupedData[count] = (groupedData[count] || 0) + 1;
                 });
+            } else {
+                console.warn('Retention data is not an array:', data);
+                chartElement.innerHTML = '<div class="alert alert-warning">Invalid retention data format</div>';
+                return;
             }
+
+            console.log('Grouped data:', groupedData);
 
             const chartData = Object.values(groupedData);
             const chartLabels = Object.keys(groupedData).map(k => `${k} orders`);
 
             if (chartData.length === 0) {
+                console.warn('No chart data available');
                 chartElement.innerHTML = '<div class="alert alert-info">No retention data available</div>';
                 return;
             }
+
+            console.log('Chart data:', chartData);
+            console.log('Chart labels:', chartLabels);
 
             const options = {
                 series: [{
@@ -226,15 +243,20 @@ const NLAnalytics = {
                     text: 'Customer Order Distribution',
                     align: 'center'
                 },
-                colors: ['#008FFB']
+                colors: ['#008FFB'],
+                dataLabels: {
+                    enabled: true
+                }
             };
 
             try {
+                console.log('Rendering chart with options:', options);
                 const chart = new ApexCharts(chartElement, options);
                 chart.render();
+                console.log('Chart rendered successfully');
             } catch (error) {
                 console.error('Error rendering retention chart:', error);
-                chartElement.innerHTML = '<div class="alert alert-danger">Error rendering retention chart</div>';
+                chartElement.innerHTML = '<div class="alert alert-danger">Error rendering retention chart: ' + error.message + '</div>';
             }
         }, 100);
 
