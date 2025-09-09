@@ -1,38 +1,39 @@
 // Natural Language Analytics
 const NLAnalytics = {
     init() {
-    const Analytics = {
-    // Only initialize if we're on the analytics page
-    const nlQueryInput = document.getElementById('nlQuery');
-    if (!nlQueryInput) return; // Exit if we're not on the analytics page
+        // Only initialize if we're on the analytics page
+        const nlQueryInput = document.getElementById('nlQuery');
+        if (!nlQueryInput) return; // Exit if we're not on the analytics page
     
-    const nlQuerySubmit = document.getElementById('nlQuerySubmit');
-    const queryResult = document.getElementById('queryResult');
-    const suggestions = document.querySelectorAll('.suggestion');
+        const nlQuerySubmit = document.getElementById('nlQuerySubmit');
+        const queryResult = document.getElementById('queryResult');
+        const suggestions = document.querySelectorAll('.suggestion');
 
-    // Handle query submission
-    nlQuerySubmit.addEventListener('click', function() {
-        submitNLQuery();
-    });
+        // Handle query submission
+        nlQuerySubmit.addEventListener('click', () => this.submitNLQuery());
 
-    // Handle Enter key press
-    nlQueryInput.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            submitNLQuery();
-        }
-    });
-
-    // Handle suggestion clicks
-    suggestions.forEach(suggestion => {
-        suggestion.addEventListener('click', function(e) {
-            e.preventDefault();
-            nlQueryInput.value = this.getAttribute('data-query');
-            submitNLQuery();
+        // Handle Enter key press
+        nlQueryInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                this.submitNLQuery();
+            }
         });
-    });
 
-    function submitNLQuery() {
+        // Handle suggestion clicks
+        suggestions.forEach(suggestion => {
+            suggestion.addEventListener('click', (e) => {
+                e.preventDefault();
+                nlQueryInput.value = suggestion.getAttribute('data-query');
+                this.submitNLQuery();
+            });
+        });
+    },
+
+    async submitNLQuery() {
+        const nlQueryInput = document.getElementById('nlQuery');
+        const queryResult = document.getElementById('queryResult');
         const query = nlQueryInput.value.trim();
+        
         if (!query) return;
 
         // Show loading state
@@ -49,183 +50,37 @@ const NLAnalytics = {
             </div>
         `;
 
-        // Make API request
-        fetch('/api/analyze', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ query: query })
-        })
-        .then(response => response.json())
-        .then(data => {
+        try {
+            // Make API request
+            const response = await fetch('/api/analyze', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query })
+            });
+            
+            const data = await response.json();
             // Display results
             queryResult.innerHTML = `
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title">Analysis Results</h5>
                         <div class="result-content">
-                            ${formatResults(data)}
+                            ${this.formatResults(data)}
                         </div>
                     </div>
                 </div>
             `;
-        })
-        .catch(error => {
+        } catch (error) {
+            console.error('Error:', error);
             queryResult.innerHTML = `
                 <div class="alert alert-danger">
                     Sorry, there was an error processing your query. Please try again.
                 </div>
             `;
-            console.error('Error:', error);
-        });
-    }
+        }
+    },
 
-        // Create products table
-    function createProductsTable(products) {
-        return `
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h5 class="card-title">Top Selling Products</h5>
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Product Name</th>
-                                    <th>Revenue</th>
-                                    <th>Units Sold</th>
-                                    <th>Average Price</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${products.map(product => `
-                                    <tr>
-                                        <td>${product.name}</td>
-                                        <td>$${formatNumber(product.revenue)}</td>
-                                        <td>${formatNumber(product.units_sold)}</td>
-                                        <td>$${formatNumber(product.revenue / product.units_sold)}</td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        `;
-    }
-
-    // Helper function to format numbers
-    function formatNumber(number) {
-        return new Intl.NumberFormat('en-US', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        }).format(number);
-    }
-    
-    // Create retention analysis chart
-    function createRetentionAnalysis(data) {
-        const chartId = 'retentionChart_' + Date.now();
-        const html = `
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h5 class="card-title">Customer Retention Analysis</h5>
-                    <div id="${chartId}" style="height: 400px;"></div>
-                </div>
-            </div>
-        `;
-
-        // Add HTML to DOM first
-        document.getElementById('queryResult').insertAdjacentHTML('beforeend', html);
-
-        // Initialize the chart
-        const groupedData = {};
-        data.forEach(p => {
-            const count = p.order_count || 0;
-            groupedData[count] = (groupedData[count] || 0) + 1;
-        });
-
-        const chart = new ApexCharts(document.getElementById(chartId), {
-            series: [{
-                name: 'Customers',
-                data: Object.values(groupedData)
-            }],
-            chart: {
-                type: 'bar',
-                height: 350
-            },
-            plotOptions: {
-                bar: {
-                    borderRadius: 4,
-                    horizontal: true,
-                }
-            },
-            xaxis: {
-                categories: Object.keys(groupedData).map(k => `${k} orders`)
-            }
-        });
-
-        chart.render();
-        return html;
-    }
-
-    // Create price sensitivity chart
-    function createPriceSensitivityChart(data) {
-        const chartId = 'priceSensitivityChart_' + Date.now();
-        const html = `
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h5 class="card-title">Price Sensitivity Analysis</h5>
-                    <div id="${chartId}" style="height: 400px;"></div>
-                </div>
-            </div>
-        `;
-
-        // Add HTML to DOM first
-        document.getElementById('queryResult').insertAdjacentHTML('beforeend', html);
-
-        // Initialize the chart
-        const chart = new ApexCharts(document.getElementById(chartId), {
-            series: [{
-                name: 'Sales Volume',
-                data: data.map(d => ({
-                    x: d.price,
-                    y: d.volume
-                }))
-            }],
-            chart: {
-                type: 'scatter',
-                height: 350,
-                zoom: {
-                    enabled: true,
-                    type: 'xy'
-                }
-            },
-            xaxis: {
-                title: { text: 'Price ($)' },
-                tickAmount: 10
-            },
-            yaxis: {
-                title: { text: 'Sales Volume' }
-            },
-            tooltip: {
-                custom: function({series, seriesIndex, dataPointIndex, w}) {
-                    const point = data[dataPointIndex];
-                    return `
-                        <div class="p-2">
-                            <strong>Price: $${point.price}</strong><br/>
-                            Volume: ${point.volume} units<br/>
-                            Revenue: $${(point.price * point.volume).toFixed(2)}
-                        </div>
-                    `;
-                }
-            }
-        });
-
-        chart.render();
-        return html;
-    }
-
-    function formatResults(data) {
+    formatResults(data) {
         if (!data) {
             return `<div class="alert alert-warning">No data received from the server</div>`;
         }
@@ -239,47 +94,44 @@ const NLAnalytics = {
         try {
             // Handle multiple result types in the same response
             if (data.monthly_stats) {
-                resultHtml += createMonthlyStatsChart(data.monthly_stats);
+                resultHtml += this.createMonthlyStatsChart(data.monthly_stats);
             }
             if (data.top_products) {
-                resultHtml += createProductsTable(data.top_products);
+                resultHtml += this.createProductsTable(data.top_products);
             }
             if (data.spending_patterns) {
-                resultHtml += createRetentionAnalysis(data.spending_patterns);
+                resultHtml += this.createRetentionAnalysis(data.spending_patterns);
+            }
+            // Fix: Handle the correct retention_data key
+            if (data.retention_data) {
+                resultHtml += this.createRetentionAnalysis(data.retention_data);
             }
             if (data.price_sensitivity) {
-                resultHtml += createPriceSensitivityChart(data.price_sensitivity);
+                resultHtml += this.createPriceSensitivityChart(data.price_sensitivity);
             }
             if (!resultHtml) {
-                resultHtml = createGenericView(data);
+                resultHtml = this.createGenericView(data);
             }
         } catch (error) {
-            console.error('Error displaying results:', error);
+            console.error('Error formatting results:', error);
             return `<div class="alert alert-danger">Error displaying results: ${error.message}</div>`;
         }
         
         return resultHtml || `<div class="alert alert-info">No matching data found for your query</div>`;
-    }
-    }
+    },
 
-    function createMonthlyStatsChart(data) {
+    createMonthlyStatsChart(data) {
         const chartId = 'monthlyStatsChart_' + Date.now();
-        const months = data.map(d => d.month);
-        const revenue = data.map(d => d.revenue);
-        const orders = data.map(d => d.order_count);
-
-        // Return the HTML first
         const html = `
-            <div class="card">
+            <div class="card mb-4">
                 <div class="card-body">
                     <h5 class="card-title">Monthly Performance Analysis</h5>
-                    <div id="${chartId}" class="chart-container"></div>
+                    <div id="${chartId}" style="height: 400px;"></div>
                 </div>
             </div>
         `;
 
-        // Initialize chart after the HTML is added to the DOM
-        requestAnimationFrame(() => {
+        setTimeout(() => {
             const chartElement = document.getElementById(chartId);
             if (!chartElement) return;
 
@@ -287,99 +139,211 @@ const NLAnalytics = {
                 series: [{
                     name: 'Revenue',
                     type: 'column',
-                    data: revenue
+                    data: data.map(d => d.revenue || 0)
                 }, {
                     name: 'Orders',
                     type: 'line',
-                    data: orders
+                    data: data.map(d => d.order_count || 0)
                 }],
                 chart: {
                     height: 350,
                     type: 'line',
-                    stacked: false,
-                    animations: {
-                        enabled: true
-                    },
-                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
+                    stacked: false
+                },
+                xaxis: {
+                    categories: data.map(d => d.month || 'Unknown')
+                },
+                yaxis: [{
+                    title: { text: 'Revenue ($)' }
+                }, {
+                    opposite: true,
+                    title: { text: 'Orders' }
+                }]
+            };
+
+            try {
+                const chart = new ApexCharts(chartElement, options);
+                chart.render();
+            } catch (error) {
+                console.error('Error rendering monthly stats chart:', error);
+                chartElement.innerHTML = '<div class="alert alert-danger">Error rendering chart</div>';
+            }
+        }, 100);
+
+        return html;
+    },
+
+    createRetentionAnalysis(data) {
+        const chartId = 'retentionChart_' + Date.now();
+        const html = `
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Customer Retention Analysis</h5>
+                    <div id="${chartId}" style="height: 400px;"></div>
+                </div>
+            </div>
+        `;
+
+        setTimeout(() => {
+            const chartElement = document.getElementById(chartId);
+            if (!chartElement) return;
+
+            const groupedData = {};
+            if (Array.isArray(data)) {
+                data.forEach(p => {
+                    const count = p.order_count || 0;
+                    groupedData[count] = (groupedData[count] || 0) + 1;
+                });
+            }
+
+            const chartData = Object.values(groupedData);
+            const chartLabels = Object.keys(groupedData).map(k => `${k} orders`);
+
+            if (chartData.length === 0) {
+                chartElement.innerHTML = '<div class="alert alert-info">No retention data available</div>';
+                return;
+            }
+
+            const options = {
+                series: [{
+                    name: 'Customers',
+                    data: chartData
+                }],
+                chart: {
+                    type: 'bar',
+                    height: 350
                 },
                 plotOptions: {
                     bar: {
-                        columnWidth: '50%'
+                        horizontal: true,
+                        borderRadius: 4
+                    }
+                },
+                xaxis: {
+                    categories: chartLabels
+                },
+                title: {
+                    text: 'Customer Order Distribution',
+                    align: 'center'
+                },
+                colors: ['#008FFB']
+            };
+
+            try {
+                const chart = new ApexCharts(chartElement, options);
+                chart.render();
+            } catch (error) {
+                console.error('Error rendering retention chart:', error);
+                chartElement.innerHTML = '<div class="alert alert-danger">Error rendering retention chart</div>';
+            }
+        }, 100);
+
+        return html;
+    },
+
+    createProductsTable(products) {
+        if (!Array.isArray(products) || products.length === 0) {
+            return `
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Top Selling Products</h5>
+                        <div class="alert alert-info">No product data available</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        const chartId = 'productsChart_' + Date.now();
+        const html = `
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Top Products by Revenue</h5>
+                            <div id="${chartId}" style="height: 400px;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Product Details</h5>
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Product</th>
+                                            <th>Units Sold</th>
+                                            <th>Revenue</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${products.map(p => `
+                                            <tr>
+                                                <td>${p.name || 'Unknown Product'}</td>
+                                                <td>${this.formatNumber(p.units_sold || 0)}</td>
+                                                <td>${this.formatCurrency(p.revenue || 0)}</td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        setTimeout(() => {
+            const chartElement = document.getElementById(chartId);
+            if (!chartElement) return;
+
+            const options = {
+                series: [{
+                    name: 'Revenue',
+                    data: products.map(p => p.revenue || 0)
+                }],
+                chart: {
+                    type: 'bar',
+                    height: 350
+                },
+                plotOptions: {
+                    bar: {
+                        borderRadius: 4,
+                        horizontal: false,
                     }
                 },
                 dataLabels: {
                     enabled: false
                 },
-                stroke: {
-                    width: [1, 4]
+                xaxis: {
+                    categories: products.map(p => p.name || 'Unknown'),
+                    labels: {
+                        rotate: -45,
+                        maxHeight: 120
+                    }
+                },
+                yaxis: {
+                    title: {
+                        text: 'Revenue ($)'
+                    },
+                    labels: {
+                        formatter: function (val) {
+                            return '$' + val.toLocaleString();
+                        }
+                    }
                 },
                 title: {
-                    text: 'Monthly Performance',
-                    align: 'left',
-                    style: {
-                        fontSize: '16px',
-                        fontWeight: 600
-                    }
+                    text: 'Revenue by Product',
+                    align: 'center'
                 },
-                xaxis: {
-                    categories: months,
-                    labels: {
-                        style: {
-                            fontSize: '12px'
-                        }
-                    }
-                },
-                yaxis: [{
-                    title: {
-                        text: 'Revenue ($)',
-                        style: {
-                            fontSize: '13px'
-                        }
-                    },
-                    labels: {
-                        formatter: function(val) {
-                            return '$' + val.toLocaleString();
-                        },
-                        style: {
-                            fontSize: '12px'
-                        }
-                    }
-                }, {
-                    opposite: true,
-                    title: {
-                        text: 'Number of Orders',
-                        style: {
-                            fontSize: '13px'
-                        }
-                    },
-                    labels: {
-                        style: {
-                            fontSize: '12px'
-                        }
-                    }
-                }],
+                colors: ['#00E396'],
                 tooltip: {
-                    shared: true,
-                    intersect: false,
-                    y: [{
-                        formatter: function(y) {
-                            if (typeof y !== "undefined") {
-                                return "$" + y.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-                            }
-                            return y;
+                    y: {
+                        formatter: function (val) {
+                            return '$' + val.toLocaleString();
                         }
-                    }, {
-                        formatter: function(y) {
-                            if (typeof y !== "undefined") {
-                                return y.toFixed(0) + " orders";
-                            }
-                            return y;
-                        }
-                    }]
-                },
-                theme: {
-                    mode: 'light',
-                    palette: 'palette1'
+                    }
                 }
             };
 
@@ -387,238 +351,170 @@ const NLAnalytics = {
                 const chart = new ApexCharts(chartElement, options);
                 chart.render();
             } catch (error) {
-                console.error('Error rendering chart:', error);
+                console.error('Error rendering products chart:', error);
                 chartElement.innerHTML = '<div class="alert alert-danger">Error rendering chart</div>';
             }
-        });
+        }, 100);
 
         return html;
-    }
+    },
 
-    function createProductsTable(products) {
-        return `
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Top Selling Products</h5>
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Product</th>
-                                    <th>Units Sold</th>
-                                    <th>Revenue</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${products.map(p => `
-                                    <tr>
-                                        <td>${p.name}</td>
-                                        <td>${p.units_sold.toLocaleString()}</td>
-                                        <td>$${p.revenue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
+    createPriceSensitivityChart(data) {
+        const chartId = 'sensitivityChart_' + Date.now();
+        const html = `
+            <div class="row">
+                <div class="col-md-8 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Price vs Volume Analysis</h5>
+                            <div id="${chartId}" style="height: 400px;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Price Categories</h5>
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Product</th>
+                                            <th>Price</th>
+                                            <th>Volume</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${data.map(d => `
+                                            <tr>
+                                                <td>${d.name || 'Unknown'}</td>
+                                                <td>${this.formatCurrency(d.price || 0)}</td>
+                                                <td>${this.formatNumber(d.volume || 0)}</td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         `;
-    }
 
-    function createGenericView(data) {
-        if (typeof data !== 'object') {
-            return `<div class="alert alert-info">${data}</div>`;
-        }
+        setTimeout(() => {
+            const chartElement = document.getElementById(chartId);
+            if (!chartElement || !Array.isArray(data) || data.length === 0) {
+                if (chartElement) {
+                    chartElement.innerHTML = '<div class="alert alert-info">No price sensitivity data available</div>';
+                }
+                return;
+            }
 
-        const entries = Object.entries(data);
-        if (entries.length === 0) {
-            return `<div class="alert alert-warning">No data available</div>`;
-        }
+            console.log('Price sensitivity data:', data); // Debug log
 
+            const options = {
+                series: [{
+                    name: 'Products',
+                    data: data.map(d => ({
+                        x: d.price || 0,
+                        y: d.volume || 0,
+                        name: d.name || 'Unknown Product'
+                    }))
+                }],
+                chart: {
+                    type: 'scatter',
+                    height: 350,
+                    zoom: {
+                        enabled: true,
+                        type: 'xy'
+                    }
+                },
+                xaxis: {
+                    title: { 
+                        text: 'Price ($)',
+                        style: {
+                            fontSize: '14px',
+                            fontWeight: 600
+                        }
+                    },
+                    labels: {
+                        formatter: function (val) {
+                            return '$' + val.toFixed(0);
+                        }
+                    }
+                },
+                yaxis: {
+                    title: { 
+                        text: 'Sales Volume (Units)',
+                        style: {
+                            fontSize: '14px',
+                            fontWeight: 600
+                        }
+                    }
+                },
+                tooltip: {
+                    custom: function({ series, seriesIndex, dataPointIndex, w }) {
+                        const point = data[dataPointIndex];
+                        return `
+                            <div class="p-3">
+                                <strong>${point.name}</strong><br/>
+                                Price: ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(point.price)}<br/>
+                                Volume: ${point.volume} units<br/>
+                                Category: ${point.price_category || 'N/A'}
+                            </div>
+                        `;
+                    }
+                },
+                colors: ['#FF4560'],
+                markers: {
+                    size: 6,
+                    hover: {
+                        size: 8
+                    }
+                },
+                grid: {
+                    borderColor: '#e7e7e7',
+                    row: {
+                        colors: ['#f3f3f3', 'transparent'],
+                        opacity: 0.5
+                    }
+                }
+            };
+
+            try {
+                const chart = new ApexCharts(chartElement, options);
+                chart.render();
+            } catch (error) {
+                console.error('Error rendering price sensitivity chart:', error);
+                chartElement.innerHTML = '<div class="alert alert-danger">Error rendering chart: ' + error.message + '</div>';
+            }
+        }, 100);
+
+        return html;
+    },
+
+    createGenericView(data) {
         return `
-            <div class="card">
+            <div class="card mb-4">
                 <div class="card-body">
                     <h5 class="card-title">Analysis Results</h5>
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Metric</th>
-                                    <th>Value</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${entries.map(([key, value]) => `
-                                    <tr>
-                                        <td>${formatHeader(key)}</td>
-                                        <td>${formatValue(value)}</td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
-                    </div>
+                    <pre class="bg-light p-3">${JSON.stringify(data, null, 2)}</pre>
                 </div>
             </div>
         `;
-    }
+    },
 
-    function createTable(data) {
-        if (!data.length) return '<p>No data available</p>';
+    formatNumber(number) {
+        return new Intl.NumberFormat('en-US').format(number || 0);
+    },
 
-        const headers = Object.keys(data[0]);
-        return `
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            ${headers.map(h => `<th>${formatHeader(h)}</th>`).join('')}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${data.map(row => `
-                            <tr>
-                                ${headers.map(h => `<td>${formatValue(row[h])}</td>`).join('')}
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            </div>
-        `;
+    formatCurrency(amount) {
+        return new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD'
+        }).format(amount || 0);
     }
+};
 
-    function createSummaryCards(data) {
-        return Object.entries(data).map(([key, value]) => `
-            <div class="card mb-3">
-                <div class="card-body">
-                    <h6 class="card-subtitle mb-2 text-muted">${formatHeader(key)}</h6>
-                    <p class="card-text h4">${formatValue(value)}</p>
-                </div>
-            </div>
-        `).join('');
-    }
-
-    function formatHeader(str) {
-        return str.split('_')
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(' ');
-    }
-
-    function formatValue(value) {
-        if (typeof value === 'number') {
-            // Format as currency if it looks like a monetary value
-            if (value > 100) {
-                return new Intl.NumberFormat('en-US', {
-                    style: 'currency',
-                    currency: 'USD'
-                }).format(value);
-            }
-            // Format as decimal if it's a small number
-            return new Intl.NumberFormat('en-US', {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            }).format(value);
-        }
-        if (value instanceof Date) {
-            return value.toLocaleDateString();
-        }
-        return value;
-    }
-
-    function createRetentionAnalysis(data) {
-        const chartDiv = document.createElement('div');
-        chartDiv.style.height = '400px';
-        chartDiv.style.marginBottom = '20px';
-        
-        const retentionChart = new ApexCharts(chartDiv, {
-            series: [{
-                name: 'Customers',
-                data: data.map(d => d.count)
-            }],
-            chart: {
-                type: 'bar',
-                height: 350
-            },
-            plotOptions: {
-                bar: {
-                    borderRadius: 4,
-                    horizontal: true,
-                }
-            },
-            xaxis: {
-                categories: data.map(d => `${d.order_count} orders`)
-            },
-            title: {
-                text: 'Customer Retention Analysis',
-                align: 'center'
-            }
-        });
-        
-        retentionChart.render();
-        
-        return `
-            <div class="mb-4">
-                <h6 class="text-muted mb-3">Customer Retention Distribution</h6>
-                ${chartDiv.outerHTML}
-            </div>
-        `;
-    }
-
-    function createPriceSensitivityChart(data) {
-        const chartDiv = document.createElement('div');
-        chartDiv.style.height = '400px';
-        chartDiv.style.marginBottom = '20px';
-        
-        const priceChart = new ApexCharts(chartDiv, {
-            series: [{
-                name: 'Sales Volume',
-                data: data.map(d => ({
-                    x: d.price,
-                    y: d.volume
-                }))
-            }],
-            chart: {
-                type: 'scatter',
-                height: 350,
-                zoom: {
-                    enabled: true,
-                    type: 'xy'
-                }
-            },
-            xaxis: {
-                title: { text: 'Price ($)' },
-                tickAmount: 10
-            },
-            yaxis: {
-                title: { text: 'Sales Volume' }
-            },
-            title: {
-                text: 'Price Sensitivity Analysis',
-                align: 'center'
-            },
-            tooltip: {
-                custom: function({series, seriesIndex, dataPointIndex, w}) {
-                    const point = data[dataPointIndex];
-                    return `
-                        <div class="p-2">
-                            <strong>Price: $${point.price}</strong><br/>
-                            Volume: ${point.volume} units<br/>
-                            Revenue: $${(point.price * point.volume).toFixed(2)}
-                        </div>
-                    `;
-                }
-            }
-        });
-        
-        priceChart.render();
-        
-        return `
-            <div class="mb-4">
-                <h6 class="text-muted mb-3">Price Sensitivity Analysis</h6>
-                ${chartDiv.outerHTML}
-                <p class="text-muted small mt-2">
-                    Chart shows the relationship between price points and sales volume
-                </p>
-            </div>
-        `;
-    }
-});
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', () => NLAnalytics.init());
