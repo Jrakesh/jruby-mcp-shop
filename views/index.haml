@@ -1,0 +1,118 @@
+.hero-section.bg-primary.text-white.py-5.mb-5
+  .container
+    .row.align-items-center
+      .col-md-8
+        %h1.display-4 Welcome to JRuby MCP Shop
+        %p.lead.mb-4 Experience the power of Model Context Protocol (MCP) in modern e-commerce
+        %a.btn.btn-light.btn-lg{href: "#features"} Explore Features
+      .col-md-4
+        %img.img-fluid{src: "/images/analytics-dashboard.png", alt: "Analytics Dashboard"}
+
+.features-section#features.py-5.bg-light
+  .container
+    %h2.text-center.mb-5 Powered by Model Context Protocol
+    
+    .row.mb-5
+      .col-md-4.mb-4
+        .card.h-100.border-0.shadow-sm
+          .card-body
+            %i.fas.fa-chart-line.fa-2x.text-primary.mb-3
+            %h3.h5 Advanced Analytics
+            %p.card-text
+              Real-time business insights with sophisticated analytics including:
+            %ul.list-unstyled
+              %li ✓ Customer spending patterns
+              %li ✓ Product performance metrics
+              %li ✓ Sales trend analysis
+              %li ✓ Inventory management
+      
+      .col-md-4.mb-4
+        .card.h-100.border-0.shadow-sm
+          .card-body
+            %i.fas.fa-brain.fa-2x.text-primary.mb-3
+            %h3.h5 Intelligent MCP Features
+            %p.card-text
+              Smart decision-making powered by MCP:
+            %ul.list-unstyled
+              %li ✓ Natural language querying
+              %li ✓ Context-aware processing
+              %li ✓ Automated insights generation
+              %li ✓ Predictive analytics
+      
+      .col-md-4.mb-4
+        .card.h-100.border-0.shadow-sm
+          .card-body
+            %i.fas.fa-rocket.fa-2x.text-primary.mb-3
+            %h3.h5 Future-Ready
+            %p.card-text
+              Upcoming features powered by MCP:
+            %ul.list-unstyled
+              %li ◎ AI-powered product recommendations
+              %li ◎ Dynamic pricing optimization
+              %li ◎ Customer behavior prediction
+              %li ◎ Automated inventory forecasting
+
+.why-mcp.py-5
+  .container
+    %h2.text-center.mb-5 Why MCP Makes Us Different
+    
+    .row.mb-4.align-items-center
+      .col-md-6.mb-4
+        %h3.h4 Natural Language Analytics
+        %p.lead
+          Instead of complex SQL queries, ask questions in plain English:
+        .code-example.bg-light.p-3.rounded
+          %p.mb-1
+            %code "Show me top selling products this month"
+          %p.mb-1
+            %code "What's the customer retention rate?"
+          %p.mb-0
+            %code "Analyze price sensitivity for electronics"
+      
+      .col-md-6.mb-4
+        %h3.h4 Contextual Intelligence
+        %p.lead
+          MCP understands business context and relationships:
+        %ul.list-unstyled
+          %li.mb-2 🔄 Cross-references between orders, products, and customers
+          %li.mb-2 🎯 Intelligent pattern recognition in sales data
+          %li.mb-2 📊 Automated correlation discovery
+          %li.mb-0 🤖 Self-improving query understanding
+
+.future-scope.bg-light.py-5
+  .container
+    %h2.text-center.mb-5 Future Possibilities with MCP
+    
+    .row
+      .col-md-6.mb-4
+        .card.border-0.shadow-sm
+          .card-body
+            %h3.h5.text-primary Integration Capabilities
+            %ul.list-unstyled
+              %li.mb-2 ⚡ Machine Learning Model Integration
+              %li.mb-2 ⚡ Voice Commerce Integration
+              %li.mb-2 ⚡ Social Commerce Analytics
+              %li.mb-0 ⚡ IoT Device Data Processing
+      
+      .col-md-6.mb-4
+        .card.border-0.shadow-sm
+          .card-body
+            %h3.h5.text-primary Advanced Features
+            %ul.list-unstyled
+              %li.mb-2 🔮 Predictive Inventory Management
+              %li.mb-2 🎯 Personalized Customer Journeys
+              %li.mb-2 📈 Real-time Market Adaptation
+              %li.mb-0 🤖 Automated Business Insights
+
+.container.mt-5
+  .row
+  - @products&.each do |product|
+    .col-md-4.mb-4
+      .card
+        %img.card-img-top{src: product.image_url || "https://via.placeholder.com/300"}
+        .card-body
+          %h5.card-title= product.name
+          %p.card-text= product.description
+          %p.card-text
+            %strong $#{sprintf('%.2f', product.price)}
+          %a.btn.btn-primary{href: "/products/#{product.id}"} View Details

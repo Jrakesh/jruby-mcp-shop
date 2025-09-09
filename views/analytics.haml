@@ -1,0 +1,32 @@
+- content_for :head do
+  %script{src: "https://cdn.jsdelivr.net/npm/chart.js"}
+  %script{src: "https://cdn.jsdelivr.net/npm/apexcharts"}
+  %script{src: "/js/analytics.js"}
+
+.container-fluid
+  %h1.mb-4 Analytics Dashboard
+  
+  .row
+    .col-md-6.mb-4
+      .card.analytics-card
+        .card-header
+          %h5.card-title Monthly Revenue
+        .card-body.chart-container
+          %canvas#revenueChart
+
+    .col-md-6.mb-4
+      .card.analytics-card
+        .card-header
+          %h5.card-title Sales Trends
+        .card-body.chart-container
+          %canvas#salesTrendChart
+
+:javascript
+  // Initialize analytics data from backend
+  window.analyticsData = {
+    monthlyStats: #{@monthly_stats.to_json},
+    topProducts: #{@top_products.to_json},
+    salesTrends: #{@sales_trends.to_json},
+    inventory: #{@inventory.to_json},
+    customerPatterns: #{@customer_patterns.to_json}
+  };

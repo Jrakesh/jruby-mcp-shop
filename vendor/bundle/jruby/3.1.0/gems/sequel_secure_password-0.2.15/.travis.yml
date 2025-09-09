@@ -1,0 +1,10 @@
+language: ruby
+script: bundle exec rake spec
+rvm:
+  - 2.0
+  - 2.1
+  - 2.2
+  - 2.3
+  - 2.4
+  - ruby-head
+  - jruby-9.1.13.0

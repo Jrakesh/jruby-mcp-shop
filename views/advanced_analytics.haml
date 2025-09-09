@@ -1,0 +1,295 @@
+- if @monthly_stats
+  :javascript
+    console.log('Monthly Stats:', #{@monthly_stats.to_json})
+    console.log('Top Products:', #{@top_products.to_json})
+    console.log('Sales Trends:', #{@sales_trends.to_json})
+    console.log('Customer Patterns:', #{@customer_patterns.to_json})
+
+.dashboard-container
+  .natural-language-query.mb-4
+    .card
+      .card-body
+        %h3.card-title.mb-3.text-primary Natural Language Analytics
+        %p.card-text.text-muted Ask questions in plain English instead of writing complex queries
+        .input-group.mb-3
+          %input.form-control.form-control-lg#nlQuery{type: "text", placeholder: "e.g., 'Show me top selling products this month' or 'What's the customer retention rate?'"}
+          %button.btn.btn-primary.btn-lg#nlQuerySubmit{type: "button"}
+            %i.fas.fa-search.me-2
+            Analyze
+        #querySuggestions.mt-3
+          %p.text-muted.mb-2 Try these examples:
+          .d-flex.flex-wrap.gap-2
+            %a.badge.rounded-pill.bg-light.text-primary.suggestion.fs-6{"data-query": "Show me top selling products this month", href: "#"}
+              %i.fas.fa-chart-line.me-1
+              Top selling products
+            %a.badge.rounded-pill.bg-light.text-primary.suggestion.fs-6{"data-query": "What's the customer retention rate?", href: "#"}
+              %i.fas.fa-users.me-1
+              Customer retention
+            %a.badge.rounded-pill.bg-light.text-primary.suggestion.fs-6{"data-query": "Analyze price sensitivity for electronics", href: "#"}
+              %i.fas.fa-tags.me-1
+              Price sensitivity
+        #queryResult.mt-4
+
+  .d-flex.justify-content-between.align-items-center.mb-4
+    %h1 Advanced Analytics Dashboard
+    .btn-group
+      %button.btn.btn-primary.dropdown-toggle{"data-bs-toggle": "dropdown"} Export Data
+      %ul.dropdown-menu
+        %li
+          %a.dropdown-item{href: "/analytics/export/csv"} Export as CSV
+        %li
+          %a.dropdown-item{href: "/analytics/export/excel"} Export as Excel
+        %li
+          %a.dropdown-item{href: "/analytics/export/json"} Export as JSON
+
+  .row
+    .col-md-6.mb-4
+      .card.analytics-card
+        .card-header.d-flex.justify-content-between.align-items-center
+          %h5.card-title Revenue Overview
+          .btn-group.btn-group-sm
+            %button.btn.btn-outline-primary.active{"data-view": "monthly"} Monthly
+            %button.btn.btn-outline-primary{"data-view": "weekly"} Weekly
+            %button.btn.btn-outline-primary{"data-view": "daily"} Daily
+        .card-body.chart-container
+          #revenueChart
+
+    .col-md-6.mb-4
+      .card
+        .card-header
+          %h5.card-title Daily Summary
+        .card-body
+          .metric-item.mb-3
+            %h6 Today's Orders
+            .h3.text-primary#todayOrders
+          .metric-item.mb-3
+            %h6 Average Order Value
+            .h3.text-warning#avgOrderValue
+
+  .row
+    .col-md-6.mb-4
+      .card
+        .card-header
+          %h5.card-title Product Performance Matrix
+        .card-body
+          #productMatrix.chart-container
+          
+    .col-md-6.mb-4
+      .card
+        .card-header
+          %h5.card-title Customer Cohort Analysis
+        .card-body
+          #cohortHeatmap.chart-container
+
+  .row
+    .col-md-4.mb-4
+      .card
+        .card-header
+          %h5.card-title Category Distribution
+        .card-body
+          #categoryTreemap.chart-container
+
+    .col-md-4.mb-4
+      .card
+        .card-header
+          %h5.card-title Seasonal Patterns
+        .card-body
+          #seasonalRadar.chart-container
+
+    .col-md-4.mb-4
+      .card
+        .card-header
+          %h5.card-title Customer Retention
+        .card-body
+          #retentionFunnel.chart-container
+
+  .row
+    .col-12.mb-4
+      .card
+        .card-header.d-flex.justify-content-between.align-items-center
+          %h5.card-title Product Affinity Network
+          %select#affinityMetric.form-select.w-auto
+            %option{value: "frequency"} By Frequency
+            %option{value: "revenue"} By Revenue
+        .card-body
+          #affinityNetwork.chart-container
+
+:javascript
+  // Enhanced Revenue Chart with Animations
+  const revenueData = #{(@monthly_stats && @monthly_stats[:monthly_stats] || []).to_json};
+  const revenueChart = new ApexCharts(document.querySelector("#revenueChart"), {
+    series: [{
+      name: 'Revenue',
+      data: revenueData.map(d => d.revenue || 0)
+    }, {
+      name: 'Orders',
+      data: revenueData.map(d => d.order_count || 0)
+    }],
+    chart: {
+      type: 'area',
+      height: 350,
+      animations: {
+        enabled: true,
+        easing: 'easeinout',
+        speed: 800,
+        dynamicAnimation: {
+          enabled: true,
+          speed: 350
+        }
+      },
+      toolbar: {
+        show: true,
+        tools: {
+          download: true,
+          selection: true,
+          zoom: true,
+          zoomin: true,
+          zoomout: true,
+          pan: true
+        }
+      }
+    },
+    stroke: {
+      curve: 'smooth'
+    },
+    fill: {
+      type: 'gradient',
+      gradient: {
+        shadeIntensity: 1,
+        opacityFrom: 0.7,
+        opacityTo: 0.3,
+        stops: [0, 90, 100]
+      }
+    },
+    dataLabels: {
+      enabled: false
+    },
+    xaxis: {
+      categories: revenueData.map(d => d.month)
+    }
+  });
+  revenueChart.render();
+
+  // Product Performance Matrix
+  const productData = #{(@top_products && @top_products[:top_products] || []).to_json};
+  const productMatrix = new ApexCharts(document.querySelector("#productMatrix"), {
+    series: [{
+      name: 'Revenue',
+      data: productData.map(d => d.revenue)
+    }],
+    chart: {
+      type: 'scatter',
+      height: 350,
+      zoom: {
+        enabled: true,
+        type: 'xy'
+      }
+    },
+    xaxis: {
+      title: { text: 'Units Sold' },
+      tickAmount: 10,
+    },
+    yaxis: {
+      title: { text: 'Revenue' }
+    },
+    markers: {
+      size: productData.map(d => Math.sqrt(d.units_sold) * 2)
+    },
+    tooltip: {
+      custom: function({series, seriesIndex, dataPointIndex, w}) {
+        const product = productData[dataPointIndex];
+        return `
+          <div class="p-2">
+            <strong>${product.name}</strong><br/>
+            Revenue: $${product.revenue}<br/>
+            Units: ${product.units_sold}<br/>
+            Avg Price: $${(product.revenue / product.units_sold).toFixed(2)}
+          </div>
+        `;
+      }
+    }
+  });
+  productMatrix.render();
+
+  // Cohort Analysis Heatmap
+  const cohortData = #{(@customer_patterns && @customer_patterns[:spending_patterns] || []).to_json};
+  const cohortHeatmap = new ApexCharts(document.querySelector("#cohortHeatmap"), {
+    series: cohortData.map(d => ({
+      name: d.email,
+      data: [d.order_count, d.average_order, d.total_spent]
+    })),
+    chart: {
+      type: 'heatmap',
+      height: 350
+    },
+    dataLabels: {
+      enabled: true
+    },
+    colors: ["#008FFB"]
+  });
+  cohortHeatmap.render();
+
+  // Category Distribution Treemap
+  const categoryData = #{(@top_products && @top_products[:top_products] ? @top_products[:top_products].group_by { |p| p[:category] || 'Uncategorized' }.map { |k,v| { x: k, y: v.sum { |p| p[:revenue] || 0 } } } : []).to_json};
+  const categoryTreemap = new ApexCharts(document.querySelector("#categoryTreemap"), {
+    series: [{
+      data: categoryData
+    }],
+    chart: {
+      type: 'treemap',
+      height: 350
+    },
+    title: {
+      text: 'Sales by Category'
+    }
+  });
+  categoryTreemap.render();
+
+  // Seasonal Radar Chart
+  const seasonalData = #{(@sales_trends && @sales_trends[:daily_trends] || []).to_json};
+  const seasonalRadar = new ApexCharts(document.querySelector("#seasonalRadar"), {
+    series: [{
+      name: 'Revenue',
+      data: seasonalData.map(d => d.revenue)
+    }],
+    chart: {
+      type: 'radar',
+      height: 350
+    },
+    xaxis: {
+      categories: seasonalData.map(d => d.date)
+    }
+  });
+  seasonalRadar.render();
+
+  // Retention Funnel
+  const retentionPatterns = #{(@customer_patterns && @customer_patterns[:spending_patterns] || []).to_json};
+  const groupedData = {};
+  retentionPatterns.forEach(p => {
+    const count = p.order_count || 0;
+    groupedData[count] = (groupedData[count] || 0) + 1;
+  });
+  const retentionData = Object.values(groupedData);
+  const retentionLabels = Object.keys(groupedData).map(k => `${k} orders`);
+  const retentionFunnel = new ApexCharts(document.querySelector("#retentionFunnel"), {
+    series: retentionData,
+    chart: {
+      type: 'pie',
+      height: 350
+    },
+    labels: retentionLabels,
+    responsive: [{
+      breakpoint: 480,
+      options: {
+        chart: {
+          width: 200
+        },
+        legend: {
+          position: 'bottom'
+        }
+      }
+    }]
+  });
+  retentionFunnel.render();
+
+!= javascript_include_tag 'js/nl-analytics.js'

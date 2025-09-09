@@ -1,0 +1,651 @@
+// Natural Language Analytics Module
+(function() {
+    'use strict';
+
+    // Initialize when the DOM is ready
+    // Natural Language Analytics Module
+(function() {
+    'use strict';
+
+    // Debug mode
+    const DEBUG = true;
+
+    // Logging helpers
+    function debug(...args) {
+        if (DEBUG) {
+            console.log('[NL Analytics]', ...args);
+        }
+    }
+
+    function error(...args) {
+        console.error('[NL Analytics]', ...args);
+    }
+
+    // Initialize when the DOM is ready
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeNLAnalytics();
+    });
+
+    // Main initialization function
+    function initializeNLAnalytics() {
+        // Only initialize if we're on the analytics page
+        const nlQueryInput = document.getElementById('nlQuery');
+    if (!nlQueryInput) return; // Exit if we're not on the analytics page
+    
+    const nlQuerySubmit = document.getElementById('nlQuerySubmit');
+    const queryResult = document.getElementById('queryResult');
+    const suggestions = document.querySelectorAll('.suggestion');
+
+    // Handle query submission
+    nlQuerySubmit.addEventListener('click', function() {
+        submitNLQuery();
+    });
+
+    // Handle Enter key press
+    nlQueryInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            submitNLQuery();
+        }
+    });
+
+    // Handle suggestion clicks
+    suggestions.forEach(suggestion => {
+        suggestion.addEventListener('click', function(e) {
+            e.preventDefault();
+            nlQueryInput.value = this.getAttribute('data-query');
+            submitNLQuery();
+        });
+    });
+
+    return {
+        submitQuery: submitNLQuery
+    };
+} // End initializeNLAnalytics
+
+})(); // End IIFE
+
+    async function submitNLQuery() {
+        const query = nlQueryInput.value.trim();
+        if (!query) return;
+
+        // Show loading state
+        queryResult.innerHTML = `
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="spinner-border text-primary me-3" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <span>Analyzing your query...</span>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        try {
+            // Make API request
+            const response = await fetch('/api/analyze', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ query: query })
+            });
+
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+
+            const data = await response.json();
+            
+            if (!data) {
+                throw new Error('No data received');
+            }
+            
+            // Display results
+            queryResult.innerHTML = `
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Analysis Results</h5>
+                        <div class="analysis-content">
+                            ${renderAnalysisResults(data)}
+                        </div>
+                    </div>
+                </div>
+            `;
+        } catch (error) {
+            console.error('Error:', error);
+            queryResult.innerHTML = `
+                <div class="card border-danger">
+                    <div class="card-body text-danger">
+                        <h5 class="card-title">Error</h5>
+                        <p>Sorry, there was an error processing your query. Please try again.</p>
+                    </div>
+                </div>
+            `;
+        }
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (!data) {
+                throw new Error('No data received');
+            }
+            
+            // Display results
+            queryResult.innerHTML = `
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Analysis Results</h5>
+                        <div class="analysis-content">
+                            ${renderAnalysisResults(data)}
+                        </div>
+                    </div>
+                </div>
+            `;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            queryResult.innerHTML = `
+                <div class="card border-danger">
+                    <div class="card-body text-danger">
+                        <h5 class="card-title">Error</h5>
+                        <p>Sorry, there was an error processing your query. Please try again.</p>
+                    </div>
+                </div>
+            `;
+        });
+            queryResult.innerHTML = `
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Analysis Results</h5>
+                        <div class="result-content">
+                            ${formatResults(data)}
+                        </div>
+                    </div>
+                </div>
+            `;
+        })
+        .catch(error => {
+            queryResult.innerHTML = `
+                <div class="alert alert-danger">
+                    Sorry, there was an error processing your query. Please try again.
+                </div>
+            `;
+            console.error('Error:', error);
+        });
+    }
+
+    // Render analysis results
+    function renderAnalysisResults(data) {
+        if (data.error) {
+            return `<div class="alert alert-danger">${data.error}</div>`;
+        }
+
+        let html = '';
+        if (data.charts) {
+            html += `<div class="analysis-charts mb-4">
+                ${data.charts.map(chart => `
+                    <div class="chart-container mb-3">
+                        <h6 class="chart-title">${chart.title}</h6>
+                        <div id="${chart.id}" class="chart"></div>
+                    </div>
+                `).join('')}
+            </div>`;
+        }
+
+        if (data.insights) {
+            html += `<div class="analysis-insights">
+                <h6>Key Insights</h6>
+                <ul class="list-unstyled">
+                    ${data.insights.map(insight => `
+                        <li class="mb-2">
+                            <i class="fas fa-chart-line text-primary me-2"></i>
+                            ${insight}
+                        </li>
+                    `).join('')}
+                </ul>
+            </div>`;
+        }
+
+        return html || '<div class="alert alert-info">No relevant data found for your query.</div>';
+    }
+
+    function formatResults(data) {
+        if (!data) {
+            return `<div class="alert alert-warning">No data received from the server</div>`;
+        }
+
+        if (data.error) {
+            return `<div class="alert alert-warning">${data.error}</div>`;
+        }
+
+        try {
+            // Handle different types of result data
+            if (data.monthly_stats) {
+                return createMonthlyStatsChart(data.monthly_stats);
+            } else if (data.top_products) {
+                return createProductsTable(data.top_products);
+            } else if (data.spending_patterns) {
+                return createSpendingPatternsTable(data.spending_patterns);
+            } else if (data.retention_data) {
+                return createRetentionAnalysis(data.retention_data);
+            } else if (data.price_sensitivity) {
+                return createPriceSensitivityChart(data.price_sensitivity);
+            } else if (data.daily_trends) {
+                return createTrendsChart(data.daily_trends);
+            } else if (data.alerts) {
+                return createAlertsTable(data.alerts);
+            } else if (data.category_affinities) {
+                return createAffinityChart(data.category_affinities);
+            } else if (data.customer_lifetime_values) {
+                return createCLVTable(data.customer_lifetime_values);
+            }
+            return createGenericView(data);
+        } catch (error) {
+            console.error('Error formatting results:', error);
+            return `<div class="alert alert-danger">Error displaying results: ${error.message}</div>`;
+        }
+
+        // If we don't have a specific formatter, try to create a generic view
+        return createGenericView(data);
+    }
+
+    function createRetentionAnalysis(data) {
+        const chartId = 'retentionChart_' + Date.now();
+        
+        // Process the data for visualization
+        const sortedData = [...data].sort((a, b) => b.order_count - a.order_count);
+        
+        return `
+            <div class="analytics-card card shadow-sm">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Customer Retention Analysis</h5>
+                </div>
+                <div class="card-body">
+                    <div id="${chartId}" class="chart-container"></div>
+                    <div class="table-responsive mt-3">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Customer</th>
+                                    <th>Orders</th>
+                                    <th>Days Between Orders</th>
+                                    <th>Customer Age (Days)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${sortedData.map(r => `
+                                    <tr>
+                                        <td>${r.email}</td>
+                                        <td>${r.order_count}</td>
+                                        <td>${r.days_between_orders}</td>
+                                        <td>${r.customer_age_days}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    function createPriceSensitivityChart(data) {
+        const chartId = 'sensitivityChart_' + Date.now();
+        const products = data.map(p => p.product);
+        const sensitivities = data.map(p => p.sensitivity_score);
+        const averagePrices = data.map(p => p.average_price);
+        
+        // Return the HTML for the chart
+        const html = `
+            <div class="analytics-card card shadow-sm">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Price Sensitivity Analysis</h5>
+                </div>
+                <div class="card-body">
+                    <div id="${chartId}" class="chart-container"></div>
+                    <div class="table-responsive mt-3">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Average Price</th>
+                                    <th>Total Sold</th>
+                                    <th>Sensitivity Score</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.map(p => `
+                                    <tr>
+                                        <td>${p.product}</td>
+                                        <td>$${p.average_price.toFixed(2)}</td>
+                                        <td>${p.total_sold}</td>
+                                        <td>${p.sensitivity_score.toFixed(3)}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Initialize chart after HTML is added to DOM
+        requestAnimationFrame(() => {
+            const chartElement = document.getElementById(chartId);
+            if (!chartElement) return;
+
+            const options = {
+                series: [{
+                    name: 'Price Sensitivity',
+                    type: 'scatter',
+                    data: data.map(p => ({
+                        x: p.average_price,
+                        y: p.sensitivity_score,
+                        z: p.total_sold
+                    }))
+                }],
+                chart: {
+                    type: 'scatter',
+                    height: 350,
+                    zoom: {
+                        enabled: true,
+                        type: 'xy'
+                    }
+                },
+                xaxis: {
+                    title: { text: 'Average Price ($)' }
+                },
+                yaxis: {
+                    title: { text: 'Price Sensitivity Score' }
+                },
+                tooltip: {
+                    custom: function({series, seriesIndex, dataPointIndex, w}) {
+                        const point = data[dataPointIndex];
+                        return `
+                            <div class="p-2">
+                                <strong>${point.product}</strong><br/>
+                                Average Price: $${point.average_price.toFixed(2)}<br/>
+                                Units Sold: ${point.total_sold}<br/>
+                                Sensitivity: ${point.sensitivity_score.toFixed(3)}
+                            </div>
+                        `;
+                    }
+                }
+            };
+
+            const chart = new ApexCharts(chartElement, options);
+            chart.render();
+        });
+
+        return html;
+    }
+
+    function createMonthlyStatsChart(data) {
+        const chartId = 'monthlyStatsChart_' + Date.now();
+        const months = data.map(d => d.month);
+        const revenue = data.map(d => d.revenue);
+        const orders = data.map(d => d.order_count);
+
+        // Return the HTML first
+            const html = `
+            <div class="analytics-card card shadow-sm">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Monthly Performance Analysis</h5>
+                </div>
+                <div class="card-body">
+                    <div id="${chartId}" class="chart-container"></div>
+                </div>
+            </div>
+        `;        // Initialize chart after the HTML is added to the DOM
+        requestAnimationFrame(() => {
+            const chartElement = document.getElementById(chartId);
+            if (!chartElement) return;
+
+            const options = {
+                series: [{
+                    name: 'Revenue',
+                    type: 'column',
+                    data: revenue
+                }, {
+                    name: 'Orders',
+                    type: 'line',
+                    data: orders
+                }],
+                chart: {
+                    height: 350,
+                    type: 'line',
+                    stacked: false,
+                    animations: {
+                        enabled: true
+                    },
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
+                },
+                plotOptions: {
+                    bar: {
+                        columnWidth: '50%'
+                    }
+                },
+                dataLabels: {
+                    enabled: false
+                },
+                stroke: {
+                    width: [1, 4]
+                },
+                title: {
+                    text: 'Monthly Performance',
+                    align: 'left',
+                    style: {
+                        fontSize: '16px',
+                        fontWeight: 600
+                    }
+                },
+                xaxis: {
+                    categories: months,
+                    labels: {
+                        style: {
+                            fontSize: '12px'
+                        }
+                    }
+                },
+                yaxis: [{
+                    title: {
+                        text: 'Revenue ($)',
+                        style: {
+                            fontSize: '13px'
+                        }
+                    },
+                    labels: {
+                        formatter: function(val) {
+                            return '$' + val.toLocaleString();
+                        },
+                        style: {
+                            fontSize: '12px'
+                        }
+                    }
+                }, {
+                    opposite: true,
+                    title: {
+                        text: 'Number of Orders',
+                        style: {
+                            fontSize: '13px'
+                        }
+                    },
+                    labels: {
+                        style: {
+                            fontSize: '12px'
+                        }
+                    }
+                }],
+                tooltip: {
+                    shared: true,
+                    intersect: false,
+                    y: [{
+                        formatter: function(y) {
+                            if (typeof y !== "undefined") {
+                                return "$" + y.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                            }
+                            return y;
+                        }
+                    }, {
+                        formatter: function(y) {
+                            if (typeof y !== "undefined") {
+                                return y.toFixed(0) + " orders";
+                            }
+                            return y;
+                        }
+                    }]
+                },
+                theme: {
+                    mode: 'light',
+                    palette: 'palette1'
+                }
+            };
+
+            try {
+                const chart = new ApexCharts(chartElement, options);
+                chart.render();
+            } catch (error) {
+                console.error('Error rendering chart:', error);
+                chartElement.innerHTML = '<div class="alert alert-danger">Error rendering chart</div>';
+            }
+        });
+
+        return html;
+    }
+
+    function createProductsTable(products) {
+        return `
+            <div class="analytics-card card shadow-sm">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Top Selling Products</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th class="text-center">Units Sold</th>
+                                    <th class="text-end">Revenue</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${products.map(p => `
+                                    <tr>
+                                        <td>${p.name}</td>
+                                        <td class="text-center">${p.units_sold.toLocaleString()}</td>
+                                        <td class="text-end">$${p.revenue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    function createGenericView(data) {
+        if (typeof data !== 'object') {
+            return `<div class="alert alert-info">${data}</div>`;
+        }
+
+        const entries = Object.entries(data);
+        if (entries.length === 0) {
+            return `<div class="alert alert-warning">No data available</div>`;
+        }
+
+        return `
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Analysis Results</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Metric</th>
+                                    <th>Value</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${entries.map(([key, value]) => `
+                                    <tr>
+                                        <td>${formatHeader(key)}</td>
+                                        <td>${formatValue(value)}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    function createTable(data) {
+        if (!data.length) return '<p>No data available</p>';
+
+        const headers = Object.keys(data[0]);
+        return `
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            ${headers.map(h => `<th>${formatHeader(h)}</th>`).join('')}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${data.map(row => `
+                            <tr>
+                                ${headers.map(h => `<td>${formatValue(row[h])}</td>`).join('')}
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+    }
+
+    function createSummaryCards(data) {
+        return Object.entries(data).map(([key, value]) => `
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">${formatHeader(key)}</h6>
+                    <p class="card-text h4">${formatValue(value)}</p>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function formatHeader(str) {
+        return str.split('_')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ');
+    }
+
+    function formatValue(value) {
+        if (typeof value === 'number') {
+            // Format as currency if it looks like a monetary value
+            if (value > 100) {
+                return new Intl.NumberFormat('en-US', {
+                    style: 'currency',
+                    currency: 'USD'
+                }).format(value);
+            }
+            // Format as decimal if it's a small number
+            return new Intl.NumberFormat('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(value);
+        }
+        if (value instanceof Date) {
+            return value.toLocaleDateString();
+        }
+        return value;
+    }
+});

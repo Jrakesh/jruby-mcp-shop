@@ -1,0 +1,158 @@
+/* Natural Language Query Styles */
+.natural-language-query {
+    background-color: #f8f9fa;
+    border-radius: 0.5rem;
+    padding: 1rem;
+}
+
+.natural-language-query .card {
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.natural-language-query .input-group {
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.natural-language-query input {
+    border: 1px solid #e9ecef;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+}
+
+.natural-language-query input:focus {
+    box-shadow: none;
+    border-color: #80bdff;
+}
+
+.natural-language-query .btn-primary {
+    padding: 0.75rem 1.5rem;
+}
+
+.suggestion {
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    padding: 0.25rem 0.75rem;
+}
+
+.suggestion:hover {
+    background-color: #e9ecef;
+    color: #0d6efd !important;
+}
+
+#queryResult {
+    transition: all 0.3s ease;
+}
+
+#queryResult .card {
+    border: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+#queryResult .table {
+    margin-bottom: 0;
+}
+
+#queryResult .table th {
+    border-top: none;
+    background-color: #f8f9fa;
+}
+
+/* Chart and Card styling */
+.analytics-card {
+    height: 450px;
+    display: flex;
+    flex-direction: column;
+}
+
+.analytics-card .card-header {
+    flex: 0 0 auto;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid rgba(0,0,0,.125);
+}
+
+.analytics-card .card-body {
+    flex: 1 1 auto;
+    overflow: auto;
+    padding: 1.25rem;
+}
+
+.chart-container {
+    height: 100%;
+    width: 100%;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.chart-container canvas,
+.chart-container .apexcharts-canvas {
+    max-height: 100%;
+    width: 100% !important;
+}
+
+#queryResult .card {
+    margin-bottom: 2rem;
+}
+
+#queryResult .apexcharts-canvas {
+    margin: 0 auto;
+}
+
+/* Responsive adjustments for charts */
+@media (max-width: 768px) {
+    .analytics-card {
+        height: 350px;
+    }
+}
+
+/* Table adjustments inside cards */
+.analytics-card .table-responsive {
+    max-height: calc(100% - 20px);
+    overflow-y: auto;
+}
+
+/* Natural Language Query card specific */
+.natural-language-query .card {
+    height: auto;
+}
+
+/* Loading state for charts */
+.chart-container.loading {
+    position: relative;
+}
+
+.chart-container.loading:after {
+    content: "Loading...";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1rem;
+    color: #6c757d;
+}
+
+/* Chart canvas sizing */
+canvas, .apexcharts-canvas {
+    width: 100% !important;
+    max-width: 100%;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .natural-language-query {
+        padding: 0.5rem;
+    }
+    
+    #querySuggestions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    
+    .suggestion {
+        margin-bottom: 0.5rem;
+    }
+}

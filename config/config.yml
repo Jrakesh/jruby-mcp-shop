@@ -1,0 +1,14 @@
+development:
+  database_url: 'jdbc:postgresql://localhost/ecommerce_db'
+  database_user: 'postgres'
+  database_password: 'postgres'
+
+test:
+  database_url: 'jdbc:postgresql://localhost/ecommerce_test_db'
+  database_user: 'postgres'
+  database_password: 'postgres'
+
+production:
+  database_url: <%= ENV['DATABASE_URL'] %>
+  database_user: <%= ENV['DATABASE_USER'] %>
+  database_password: <%= ENV['DATABASE_PASSWORD'] %>
