@@ -1,0 +1,46 @@
+require 'rake'
+require 'rake/testtask'
+
+# Define test task
+Rake::TestTask.new do |t|
+  t.libs << 'test'
+  t.test_files = FileList['test/test_*.rb']
+  t.verbose = true
+end
+
+# Default task
+task default: :test
+
+desc 'Run all tests'
+task :test_all do
+  puts 'Running all tests...'
+  Rake::Task[:test].invoke
+end
+
+desc 'Run specific test file'
+task :test_file, [:file] do |t, args|
+  if args[:file]
+    sh "ruby test/#{args[:file]}"
+  else
+    puts 'Please specify a test file: rake test_file[test_application]'
+  end
+end
+
+desc 'Setup test database'
+task :test_setup do
+  ENV['RACK_ENV'] = 'test'
+  require_relative 'app'
+  
+  # Create test data if needed
+  puts 'Setting up test environment...'
+  # Add any test setup logic here
+end
+
+desc 'Clean test data'
+task :test_cleanup do
+  ENV['RACK_ENV'] = 'test'
+  require_relative 'app'
+  
+  puts 'Cleaning up test data...'
+  # Add cleanup logic here
+end

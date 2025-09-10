@@ -3,27 +3,13 @@ class EcommerceApp < Sinatra::Base
   get '/analytics/advanced' do
     @mcp = EcommerceMCP.new(settings.database)
     
-    begin
-      @monthly_stats = @mcp.handle_query("monthly orders")
-      @top_products = @mcp.handle_query("top selling products")
-      @sales_trends = @mcp.handle_query("sales trends")
-      @customer_patterns = @mcp.handle_query("customer spending patterns")
-      @category_performance = @mcp.handle_query("category performance all")
-      @customer_retention = @mcp.handle_query("customer retention")
-      
-    rescue => e
-      puts "[ERROR] Failed to fetch analytics data: #{e.message}"
-      puts e.backtrace
-      
-      # Set default empty data structures
-      @monthly_stats = { monthly_stats: [] }
-      @top_products = { top_products: [] }
-      @sales_trends = { daily_trends: [] }
-      @customer_patterns = { spending_patterns: [] }
-      @category_performance = { categories: [] }
-      @customer_retention = { cohorts: [] }
-    end
-
+    @monthly_stats = @mcp.handle_query("monthly orders")
+    @top_products = @mcp.handle_query("top selling products")
+    @sales_trends = @mcp.handle_query("sales trends")
+    @customer_patterns = @mcp.handle_query("customer spending patterns")
+    @category_performance = @mcp.handle_query("category performance all")
+    @customer_retention = @mcp.handle_query("customer retention")
+    
     haml :advanced_analytics
   end
 

@@ -1,0 +1,279 @@
+.dashboard-container
+  .hero-section.bg-primary.text-white.py-4.mb-4
+    .container
+      .row.align-items-center
+        .col-md-8
+          %h1.display-5 Hotels & Restaurants
+          %p.lead Find the best hotels and restaurants in any city using AI-powered search
+        .col-md-4
+          %i.fas.fa-map-marker-alt.fa-4x.text-light.opacity-50
+
+  .container
+    .search-section.mb-5
+      .card.shadow-sm
+        .card-body
+          %h3.card-title.mb-3.text-primary
+            %i.fas.fa-search.me-2
+            Search Hotels & Restaurants
+          %form#hotelRestaurantForm{method: "POST", action: "/api/search/hotels-restaurants"}
+            .row.g-3
+              .col-md-6
+                %label.form-label{for: "location"} Location/City
+                %input.form-control.form-control-lg#location{type: "text", name: "location", placeholder: "e.g., New York, NY", required: true}
+                %small.form-text.text-muted Enter city name, address, or area
+              
+              .col-md-4
+                %label.form-label{for: "search_type"} Search Type
+                %select.form-select.form-select-lg#search_type{name: "search_type"}
+                  %option{value: "hotels and restaurants"} Hotels & Restaurants
+                  %option{value: "hotels"} Hotels Only
+                  %option{value: "restaurants"} Restaurants Only
+                  %option{value: "fine dining"} Fine Dining
+                  %option{value: "budget hotels"} Budget Hotels
+                  %option{value: "luxury hotels"} Luxury Hotels
+              
+              .col-md-2.d-flex.align-items-end
+                %button.btn.btn-primary.btn-lg.w-100{type: "submit"}
+                  %i.fas.fa-search.me-2
+                  Search
+
+    #searchResults.mt-4
+
+    .sample-searches.mb-5
+      .card.bg-light
+        .card-body
+          %h5.card-title
+            %i.fas.fa-lightbulb.me-2.text-warning
+            Sample Searches
+          .row.g-2
+            .col-md-3
+              %button.btn.btn-outline-primary.btn-sm.sample-search{"data-location": "Manhattan, New York", "data-type": "luxury hotels"}
+                %i.fas.fa-star.me-1
+                Luxury Hotels in Manhattan
+            .col-md-3
+              %button.btn.btn-outline-primary.btn-sm.sample-search{"data-location": "San Francisco, CA", "data-type": "restaurants"}
+                %i.fas.fa-utensils.me-1
+                SF Restaurants
+            .col-md-3
+              %button.btn.btn-outline-primary.btn-sm.sample-search{"data-location": "Miami Beach, FL", "data-type": "hotels and restaurants"}
+                %i.fas.fa-map-marker.me-1
+                Miami Beach Spots
+            .col-md-3
+              %button.btn.btn-outline-primary.btn-sm.sample-search{"data-location": "Las Vegas, NV", "data-type": "fine dining"}
+                %i.fas.fa-wine-glass.me-1
+                Vegas Fine Dining
+
+:javascript
+  document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('hotelRestaurantForm');
+    const resultsDiv = document.getElementById('searchResults');
+    const sampleSearches = document.querySelectorAll('.sample-search');
+
+    // Handle sample search clicks
+    sampleSearches.forEach(button => {
+      button.addEventListener('click', function() {
+        const location = this.getAttribute('data-location');
+        const type = this.getAttribute('data-type');
+        
+        document.getElementById('location').value = location;
+        document.getElementById('search_type').value = type;
+        
+        // Auto-submit the form
+        form.dispatchEvent(new Event('submit'));
+      });
+    });
+
+    // Handle form submission
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const formData = new FormData(form);
+      const location = formData.get('location');
+      const searchType = formData.get('search_type');
+
+      if (!location.trim()) {
+        alert('Please enter a location to search');
+        return;
+      }
+
+      // Show loading state
+      resultsDiv.innerHTML = `
+        <div class="card">
+          <div class="card-body text-center">
+            <div class="spinner-border text-primary me-3" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <span>Searching for ${searchType} in ${location}...</span>
+          </div>
+        </div>
+      `;
+
+      // Make API request
+      fetch('/api/search/hotels-restaurants', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          location: location,
+          search_type: searchType
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        displayResults(data);
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        resultsDiv.innerHTML = `
+          <div class="alert alert-danger">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            Sorry, there was an error searching for hotels and restaurants. Please try again.
+          </div>
+        `;
+      });
+    });
+
+    function displayResults(data) {
+      if (data.error) {
+        resultsDiv.innerHTML = `
+          <div class="alert alert-warning">
+            <i class="fas fa-info-circle me-2"></i>
+            ${data.error}
+          </div>
+        `;
+        return;
+      }
+
+      if (!data.results || data.results.length === 0) {
+        resultsDiv.innerHTML = `
+          <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            No hotels or restaurants found for your search. Try a different location or search type.
+          </div>
+        `;
+        return;
+      }
+
+      let html = `
+        <div class="card">
+          <div class="card-header">
+            <h5 class="mb-0">
+              <i class="fas fa-map-marker-alt me-2"></i>
+              Found ${data.total_results} results for "${data.query}" in ${data.location}
+            </h5>
+          </div>
+          <div class="card-body p-0">
+            <div class="row g-0">
+      `;
+
+      data.results.forEach((result, index) => {
+        const ratingStars = generateStarRating(result.rating);
+        const typeIcon = getTypeIcon(result.type);
+        
+        html += `
+          <div class="col-md-6 col-lg-4">
+            <div class="card border-0 h-100">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                  <h6 class="card-title mb-1">
+                    <i class="${typeIcon} me-1"></i>
+                    ${result.title}
+                  </h6>
+                  <span class="badge bg-primary">${result.type}</span>
+                </div>
+                
+                <div class="mb-2">
+                  ${ratingStars}
+                  <small class="text-muted ms-2">(${result.reviews} reviews)</small>
+                </div>
+                
+                <p class="card-text small mb-2">
+                  <i class="fas fa-map-marker-alt me-1 text-muted"></i>
+                  ${result.address}
+                </p>
+                
+                ${result.price_range !== 'Price not available' ? `
+                  <p class="card-text small mb-2">
+                    <i class="fas fa-dollar-sign me-1 text-success"></i>
+                    ${result.price_range}
+                  </p>
+                ` : ''}
+                
+                ${result.phone !== 'Phone not available' ? `
+                  <p class="card-text small mb-2">
+                    <i class="fas fa-phone me-1 text-muted"></i>
+                    ${result.phone}
+                  </p>
+                ` : ''}
+                
+                <p class="card-text small text-muted mb-3">${result.description}</p>
+                
+                <div class="d-flex gap-2">
+                  ${result.website ? `
+                    <a href="${result.website}" target="_blank" class="btn btn-outline-primary btn-sm">
+                      <i class="fas fa-external-link-alt me-1"></i>
+                      Website
+                    </a>
+                  ` : ''}
+                  <button class="btn btn-outline-secondary btn-sm" onclick="navigator.share && navigator.share({title: '${result.title}', text: '${result.address}'})">
+                    <i class="fas fa-share me-1"></i>
+                    Share
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      html += `
+            </div>
+          </div>
+        </div>
+      `;
+
+      resultsDiv.innerHTML = html;
+    }
+
+    function generateStarRating(rating) {
+      if (!rating || rating === 'Not rated') {
+        return '<span class="text-muted">Not rated</span>';
+      }
+      
+      const numRating = parseFloat(rating);
+      const fullStars = Math.floor(numRating);
+      const hasHalfStar = numRating % 1 >= 0.5;
+      let stars = '';
+      
+      for (let i = 0; i < fullStars; i++) {
+        stars += '<i class="fas fa-star text-warning"></i>';
+      }
+      
+      if (hasHalfStar) {
+        stars += '<i class="fas fa-star-half-alt text-warning"></i>';
+      }
+      
+      const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+      for (let i = 0; i < emptyStars; i++) {
+        stars += '<i class="far fa-star text-muted"></i>';
+      }
+      
+      return `${stars} <span class="ms-1">${rating}</span>`;
+    }
+
+    function getTypeIcon(type) {
+      const typeMap = {
+        'restaurant': 'fas fa-utensils',
+        'hotel': 'fas fa-bed',
+        'lodging': 'fas fa-bed',
+        'food': 'fas fa-utensils',
+        'bar': 'fas fa-wine-glass',
+        'cafe': 'fas fa-coffee',
+        'default': 'fas fa-map-marker-alt'
+      };
+      
+      const lowerType = type.toLowerCase();
+      return typeMap[lowerType] || typeMap['default'];
+    }
+  });

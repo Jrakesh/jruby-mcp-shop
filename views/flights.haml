@@ -1,0 +1,302 @@
+.dashboard-container
+  .hero-section.bg-primary.text-white.py-4.mb-4
+    .container
+      .row.align-items-center
+        .col-md-8
+          %h1.display-5 Flight Search
+          %p.lead Find the best flight deals with AI-powered search across multiple airlines
+        .col-md-4
+          %i.fas.fa-plane.fa-4x.text-light.opacity-50
+
+  .container
+    .search-section.mb-5
+      .card.shadow-sm
+        .card-body
+          %h3.card-title.mb-3.text-primary
+            %i.fas fa-search.me-2
+            Search Flights
+          %form#flightSearchForm{method: "POST", action: "/api/search/flights"}
+            .row.g-3
+              .col-md-3
+                %label.form-label{for: "origin"} From
+                %input.form-control.form-control-lg#origin{type: "text", name: "origin", placeholder: "e.g., JFK, New York", required: true}
+                %small.form-text.text-muted Airport code or city name
+              
+              .col-md-3
+                %label.form-label{for: "destination"} To
+                %input.form-control.form-control-lg#destination{type: "text", name: "destination", placeholder: "e.g., LAX, Los Angeles", required: true}
+                %small.form-text.text-muted Airport code or city name
+              
+              .col-md-2
+                %label.form-label{for: "departure_date"} Departure
+                %input.form-control.form-control-lg#departure_date{type: "date", name: "departure_date", required: true}
+              
+              .col-md-2
+                %label.form-label{for: "return_date"} Return (Optional)
+                %input.form-control.form-control-lg#return_date{type: "date", name: "return_date"}
+              
+              .col-md-2.d-flex.align-items-end
+                %button.btn.btn-primary.btn-lg.w-100{type: "submit"}
+                  %i.fas.fa-search.me-2
+                  Search
+
+    #flightResults.mt-4
+
+    .popular-routes.mb-5
+      .card.bg-light
+        .card-body
+          %h5.card-title
+            %i.fas.fa-route.me-2.text-info
+            Popular Routes
+          .row.g-2
+            .col-md-3
+              %button.btn.btn-outline-info.btn-sm.popular-route{"data-origin": "JFK", "data-destination": "LAX"}
+                %i.fas.fa-plane.me-1
+                NYC → LA
+            .col-md-3
+              %button.btn.btn-outline-info.btn-sm.popular-route{"data-origin": "SFO", "data-destination": "JFK"}
+                %i.fas.fa-plane.me-1
+                SF → NYC
+            .col-md-3
+              %button.btn.btn-outline-info.btn-sm.popular-route{"data-origin": "LAX", "data-destination": "MIA"}
+                %i.fas.fa-plane.me-1
+                LA → Miami
+            .col-md-3
+              %button.btn.btn-outline-info.btn-sm.popular-route{"data-origin": "ORD", "data-destination": "SEA"}
+                %i.fas.fa-plane.me-1
+                Chicago → Seattle
+
+:javascript
+  document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('flightSearchForm');
+    const resultsDiv = document.getElementById('flightResults');
+    const popularRoutes = document.querySelectorAll('.popular-route');
+    
+    // Set minimum date to today
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('departure_date').min = today;
+    document.getElementById('return_date').min = today;
+    
+    // Update return date minimum when departure date changes
+    document.getElementById('departure_date').addEventListener('change', function() {
+      document.getElementById('return_date').min = this.value;
+    });
+
+    // Handle popular route clicks
+    popularRoutes.forEach(button => {
+      button.addEventListener('click', function() {
+        const origin = this.getAttribute('data-origin');
+        const destination = this.getAttribute('data-destination');
+        
+        document.getElementById('origin').value = origin;
+        document.getElementById('destination').value = destination;
+        
+        // Set departure date to tomorrow
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        document.getElementById('departure_date').value = tomorrow.toISOString().split('T')[0];
+      });
+    });
+
+    // Handle form submission
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const formData = new FormData(form);
+      const origin = formData.get('origin');
+      const destination = formData.get('destination');
+      const departureDate = formData.get('departure_date');
+      const returnDate = formData.get('return_date');
+
+      if (!origin.trim() || !destination.trim() || !departureDate) {
+        alert('Please fill in all required fields');
+        return;
+      }
+
+      // Show loading state
+      resultsDiv.innerHTML = `
+        <div class="card">
+          <div class="card-body text-center">
+            <div class="spinner-border text-primary me-3" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <span>Searching flights from ${origin} to ${destination}...</span>
+          </div>
+        </div>
+      `;
+
+      // Make API request
+      fetch('/api/search/flights', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          origin: origin,
+          destination: destination,
+          departure_date: departureDate,
+          return_date: returnDate
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        displayFlightResults(data);
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        resultsDiv.innerHTML = `
+          <div class="alert alert-danger">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            Sorry, there was an error searching for flights. Please try again.
+          </div>
+        `;
+      });
+    });
+
+    function displayFlightResults(data) {
+      if (data.error) {
+        resultsDiv.innerHTML = `
+          <div class="alert alert-warning">
+            <i class="fas fa-info-circle me-2"></i>
+            ${data.error}
+          </div>
+        `;
+        return;
+      }
+
+      if (!data.results || data.results.length === 0) {
+        resultsDiv.innerHTML = `
+          <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            No flights found for your search criteria. Try different dates or airports.
+          </div>
+        `;
+        return;
+      }
+
+      const searchParams = data.search_params;
+      let html = `
+        <div class="card">
+          <div class="card-header">
+            <h5 class="mb-0">
+              <i class="fas fa-plane me-2"></i>
+              Flight Results: ${searchParams.origin} → ${searchParams.destination}
+            </h5>
+            <small class="text-muted">
+              Departure: ${searchParams.departure_date}
+              ${searchParams.return_date ? ` | Return: ${searchParams.return_date}` : ''}
+            </small>
+          </div>
+          <div class="card-body p-0">
+      `;
+
+      // Group flights by category
+      const bestFlights = data.results.filter(f => f.category === 'Best');
+      const otherFlights = data.results.filter(f => f.category !== 'Best');
+
+      if (bestFlights.length > 0) {
+        html += `
+          <div class="p-3 bg-light">
+            <h6 class="text-primary mb-3">
+              <i class="fas fa-star me-2"></i>
+              Best Flights
+            </h6>
+            <div class="row g-3">
+        `;
+        
+        bestFlights.forEach(flight => {
+          html += generateFlightCard(flight, true);
+        });
+        
+        html += `
+            </div>
+          </div>
+        `;
+      }
+
+      if (otherFlights.length > 0) {
+        html += `
+          <div class="p-3">
+            <h6 class="text-secondary mb-3">
+              <i class="fas fa-list me-2"></i>
+              Other Available Flights
+            </h6>
+            <div class="row g-3">
+        `;
+        
+        otherFlights.forEach(flight => {
+          html += generateFlightCard(flight, false);
+        });
+        
+        html += `
+            </div>
+          </div>
+        `;
+      }
+
+      html += `
+          </div>
+        </div>
+      `;
+
+      resultsDiv.innerHTML = html;
+    }
+
+    function generateFlightCard(flight, isBest) {
+      const badgeClass = isBest ? 'bg-success' : 'bg-secondary';
+      const stopsText = flight.stops === 0 ? 'Non-stop' : `${flight.stops} stop${flight.stops > 1 ? 's' : ''}`;
+      
+      return `
+        <div class="col-md-6 col-lg-4">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start mb-3">
+                <div class="d-flex align-items-center">
+                  ${flight.airline_logo ? `<img src="${flight.airline_logo}" alt="${flight.airline}" class="me-2" style="height: 24px;">` : ''}
+                  <div>
+                    <h6 class="mb-0">${flight.airline}</h6>
+                    <small class="text-muted">${flight.flight_number}</small>
+                  </div>
+                </div>
+                <span class="badge ${badgeClass}">${flight.category}</span>
+              </div>
+              
+              <div class="flight-route mb-3">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div class="text-center">
+                    <div class="fw-bold">${flight.departure_time || 'N/A'}</div>
+                    <small class="text-muted">${flight.departure_airport}</small>
+                  </div>
+                  <div class="text-center flex-grow-1 mx-3">
+                    <i class="fas fa-plane text-primary"></i>
+                    <div><small class="text-muted">${flight.duration || 'N/A'}</small></div>
+                    <div><small class="text-muted">${stopsText}</small></div>
+                  </div>
+                  <div class="text-center">
+                    <div class="fw-bold">${flight.arrival_time || 'N/A'}</div>
+                    <small class="text-muted">${flight.arrival_airport}</small>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="d-flex justify-content-between align-items-center">
+                <div class="price">
+                  <span class="h5 text-success mb-0">${flight.price}</span>
+                </div>
+                <button class="btn btn-primary btn-sm" onclick="bookFlight('${flight.booking_token}', '${flight.airline}', '${flight.flight_number}')">
+                  <i class="fas fa-ticket-alt me-1"></i>
+                  Select
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+    
+    // Global function for booking (placeholder)
+    window.bookFlight = function(token, airline, flightNumber) {
+      alert(`Booking functionality would be implemented here for ${airline} flight ${flightNumber}`);
+      // In a real application, this would redirect to a booking page or open a modal
+    };
+  });
