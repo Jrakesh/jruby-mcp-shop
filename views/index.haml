@@ -3,55 +3,338 @@
     .row.align-items-center
       .col-md-8
         %h1.display-4 Welcome to JRuby MCP Shop
-        %p.lead.mb-4 Experience the power of Model Context Protocol (MCP) in modern e-commerce
+        %p.lead.mb-4 Experience the power of Model Context Protocol (MCP) with fast-mcp gem and AI-powered travel search using SerpAPI
         %a.btn.btn-light.btn-lg{href: "#features"} Explore Features
       .col-md-4
-        %img.img-fluid{src: "/images/analytics-dashboard.png", alt: "Analytics Dashboard"}
+        %img.img-fluid{src: "/images/analytics-dashboard.svg", alt: "Analytics Dashboard"}
 
 .features-section#features.py-5.bg-light
   .container
-    %h2.text-center.mb-5 Powered by Model Context Protocol
+    %h2.text-center.mb-5 Powered by Model Context Protocol & AI Search
     
     .row.mb-5
-      .col-md-4.mb-4
-        .card.h-100.border-0.shadow-sm
-          .card-body
-            %i.fas.fa-chart-line.fa-2x.text-primary.mb-3
-            %h3.h5 Advanced Analytics
-            %p.card-text
-              Real-time business insights with sophisticated analytics including:
-            %ul.list-unstyled
-              %li ✓ Customer spending patterns
-              %li ✓ Product performance metrics
-              %li ✓ Sales trend analysis
-              %li ✓ Inventory management
-      
-      .col-md-4.mb-4
+      .col-md-6.mb-4
         .card.h-100.border-0.shadow-sm
           .card-body
             %i.fas.fa-brain.fa-2x.text-primary.mb-3
-            %h3.h5 Intelligent MCP Features
+            %h3.h5 Fast-MCP Gem Integration
             %p.card-text
-              Smart decision-making powered by MCP:
+              High-performance Model Context Protocol implementation:
             %ul.list-unstyled
-              %li ✓ Natural language querying
-              %li ✓ Context-aware processing
-              %li ✓ Automated insights generation
-              %li ✓ Predictive analytics
+              %li 
+                ✓ 
+                %strong Natural language processing
+                for business queries
+              %li 
+                ✓ 
+                %strong Context-aware analytics
+                across multiple data sources
+              %li 
+                ✓ 
+                %strong Real-time insight generation
+                from complex datasets
+              %li 
+                ✓ 
+                %strong Memory-efficient processing
+                with native Ruby bindings
+              %li 
+                ✓ 
+                %strong Concurrent query handling
+                for multiple simultaneous requests
       
-      .col-md-4.mb-4
+      .col-md-6.mb-4
         .card.h-100.border-0.shadow-sm
           .card-body
-            %i.fas.fa-rocket.fa-2x.text-primary.mb-3
-            %h3.h5 Future-Ready
+            %i.fas.fa-search-location.fa-2x.text-primary.mb-3
+            %h3.h5 AI-Powered SerpAPI Integration
             %p.card-text
-              Upcoming features powered by MCP:
+              Real-time travel search capabilities:
             %ul.list-unstyled
-              %li ◎ AI-powered product recommendations
-              %li ◎ Dynamic pricing optimization
-              %li ◎ Customer behavior prediction
-              %li ◎ Automated inventory forecasting
+              %li 
+                ✓ 
+                %strong Live hotel & restaurant data
+                from Google Maps via SerpAPI
+              %li 
+                ✓ 
+                %strong Real-time flight information
+                from Google Flights integration
+              %li 
+                ✓ 
+                %strong 300+ Indian cities coverage
+                with comprehensive location mapping
+              %li 
+                ✓ 
+                %strong Global destination support
+                for international travel
+              %li 
+                ✓ 
+                %strong Smart error handling
+                with graceful fallback to demo data
 
+.mcp-deep-dive.py-5
+  .container
+    %h2.text-center.mb-5 How Fast-MCP Gem Powers Our Intelligence
+    
+    .row.mb-4.align-items-center
+      .col-md-6.mb-4
+        %h3.h4 
+          %i.fas.fa-cogs.text-primary.me-2
+          High-Performance Architecture
+        %p.lead
+          The fast-mcp gem provides optimized Ruby bindings for Model Context Protocol:
+        .code-example.bg-dark.text-light.p-3.rounded
+          %pre.mb-0
+            %code.text-success
+              = "# Natural language to business intelligence"
+              %br
+              = 'query = "Show revenue trends for Q3 electronics"'
+              %br
+              %span.text-info
+                = "# Fast-MCP processes context and relationships"
+              %br
+              = "result = MCPProcessor.analyze(query, context: :sales)"
+              %br
+              %span.text-warning
+                = "# Returns structured insights with correlations"
+      
+      .col-md-6.mb-4
+        %img.img-fluid.rounded.shadow{src: "/images/mcp-processing-flow.svg", alt: "MCP Processing Flow"}
+
+    .row.mb-4.align-items-center
+      .col-md-6.mb-4.order-md-2
+        %h3.h4 
+          %i.fas.fa-network-wired.text-primary.me-2
+          Context-Aware Data Processing
+        %p.lead
+          Advanced relationship mapping and pattern recognition:
+        %ul.list-unstyled
+          %li.mb-2 
+            %i.fas.fa-check-circle.text-success.me-2
+            %strong Cross-referential analysis:
+            Links orders, products, and customer behavior automatically
+          %li.mb-2 
+            %i.fas.fa-check-circle.text-success.me-2
+            %strong Intelligent correlation discovery:
+            Finds hidden patterns in business data
+          %li.mb-2 
+            %i.fas.fa-check-circle.text-success.me-2
+            %strong Self-improving algorithms:
+            Learns from query patterns to enhance accuracy
+          %li.mb-0 
+            %i.fas.fa-check-circle.text-success.me-2
+            %strong Real-time processing:
+            Delivers insights in milliseconds, not minutes
+      
+      .col-md-6.mb-4.order-md-1
+        %img.img-fluid.rounded.shadow{src: "/images/context-mapping.svg", alt: "Context Mapping"}
+
+.serpapi-deep-dive.bg-light.py-5
+  .container
+    %h2.text-center.mb-5 How SerpAPI Powers Real-Time Travel Search
+    
+    .row.mb-4.align-items-center
+      .col-md-6.mb-4
+        %h3.h4 
+          %i.fas.fa-hotel.text-primary.me-2
+          Hotels & Restaurants Intelligence
+        %p.lead
+          Advanced location-based search with comprehensive coverage:
+        .bg-white.p-3.rounded.border
+          %h6.text-primary.mb-2 Search Process:
+          %ol.mb-3
+            %li 
+              %strong Location Resolution:
+              GPS coordinates lookup from 300+ Indian cities
+            %li 
+              %strong SerpAPI Query:
+              Real-time Google Maps data via optimized API calls
+            %li 
+              %strong Data Processing:
+              Structured formatting with ratings, reviews, and pricing
+            %li 
+              %strong Smart Fallback:
+              Demo data if API unavailable, ensuring uninterrupted service
+          .small.text-muted
+            %i.fas.fa-info-circle.me-1
+            Covers Mumbai, Delhi, Bangalore, Chennai, Hyderabad, and 295+ more cities
+      
+      .col-md-6.mb-4
+        %img.img-fluid.rounded.shadow{src: "/images/hotel-search-flow.svg", alt: "Hotel Search Process"}
+
+    .row.mb-4.align-items-center
+      .col-md-6.mb-4.order-md-2
+        %h3.h4 
+          %i.fas.fa-plane.text-primary.me-2
+          Flight Search Technology
+        %p.lead
+          Real-time flight data with comprehensive route coverage:
+        .bg-white.p-3.rounded.border
+          %h6.text-primary.mb-2 Technical Implementation:
+          %ul.list-unstyled.mb-3
+            %li.mb-2 
+              %i.fas.fa-arrow-right.text-success.me-2
+              %strong Airport Code Resolution:
+              Automatic mapping of cities to IATA codes (BOM, DEL, BLR, etc.)
+            %li.mb-2 
+              %i.fas.fa-arrow-right.text-success.me-2
+              %strong Google Flights Integration:
+              Live pricing and availability via SerpAPI
+            %li.mb-2 
+              %i.fas.fa-arrow-right.text-success.me-2
+              %strong Multi-Parameter Search:
+              Passengers, class, dates, round-trip options
+            %li.mb-0 
+              %i.fas.fa-arrow-right.text-success.me-2
+              %strong Error Resilience:
+              10-second timeout with graceful fallback to sample data
+          .small.text-muted
+            %i.fas.fa-globe.me-1
+            Supports 100+ Indian airports and major global destinations
+      
+      .col-md-6.mb-4.order-md-1
+        %img.img-fluid.rounded.shadow{src: "/images/flight-search-api.svg", alt: "Flight Search API"}
+
+.technical-architecture.py-5
+  .container
+    %h2.text-center.mb-5 Technical Architecture & Performance
+    
+    .row
+      .col-md-4.mb-4
+        .card.border-0.shadow-sm.h-100
+          .card-body.text-center
+            %i.fas.fa-tachometer-alt.fa-3x.text-primary.mb-3
+            %h3.h5 High Performance
+            %ul.list-unstyled
+              %li.mb-2 
+                %strong Fast-MCP Gem:
+                Native Ruby bindings for optimal speed
+              %li.mb-2 
+                %strong Connection Pooling:
+                Efficient database resource management
+              %li.mb-2 
+                %strong Async Processing:
+                Non-blocking API calls with timeouts
+              %li.mb-0 
+                %strong Caching Strategy:
+                Intelligent data caching for frequent queries
+      
+      .col-md-4.mb-4
+        .card.border-0.shadow-sm.h-100
+          .card-body.text-center
+            %i.fas.fa-shield-alt.fa-3x.text-success.mb-3
+            %h3.h5 Security & Reliability
+            %ul.list-unstyled
+              %li.mb-2 
+                %strong API Key Protection:
+                Environment-based configuration
+              %li.mb-2 
+                %strong Error Handling:
+                Comprehensive exception management
+              %li.mb-2 
+                %strong Data Validation:
+                Input sanitization and validation
+              %li.mb-0 
+                %strong Fallback Systems:
+                Graceful degradation when services unavailable
+      
+      .col-md-4.mb-4
+        .card.border-0.shadow-sm.h-100
+          .card-body.text-center
+            %i.fas.fa-expand-arrows-alt.fa-3x.text-info.mb-3
+            %h3.h5 Scalability
+            %ul.list-unstyled
+              %li.mb-2 
+                %strong JRuby Runtime:
+                Java ecosystem integration and threading
+              %li.mb-2 
+                %strong Modular Design:
+                Easily extensible service architecture
+              %li.mb-2 
+                %strong API-First Approach:
+                RESTful endpoints for external integration
+              %li.mb-0 
+                %strong Database Optimization:
+                Sequel ORM with connection management
+
+.api-showcase.bg-dark.text-white.py-5
+  .container
+    %h2.text-center.mb-5 Live API Demonstrations
+    
+    .row
+      .col-md-6.mb-4
+        .card.bg-secondary.border-0.h-100
+          .card-body
+            %h3.h5.text-warning 
+              %i.fas.fa-map-marker-alt.me-2
+              Hotels & Restaurants API
+            %p.card-text
+              Experience real-time search across Indian cities:
+            .bg-dark.p-3.rounded.mb-3
+              %code.text-success
+                = "GET /api/hotels-restaurants?city=Mumbai&query=luxury"
+                %br
+                %span.text-muted
+                  = "# Returns live data from Google Maps"
+            %a.btn.btn-outline-warning{href: "/hotels", target: "_blank"} Try Live Search →
+      
+      .col-md-6.mb-4
+        .card.bg-secondary.border-0.h-100
+          .card-body
+            %h3.h5.text-info 
+              %i.fas.fa-plane-departure.me-2
+              Flight Search API
+            %p.card-text
+              Real-time flight data with comprehensive routing:
+            .bg-dark.p-3.rounded.mb-3
+              %code.text-success
+                = "GET /api/flights?from=Mumbai&to=Delhi&date=2024-01-15"
+                %br
+                %span.text-muted
+                  = "# Returns live pricing from Google Flights"
+            %a.btn.btn-outline-info{href: "/flights", target: "_blank"} Search Flights →
+
+.performance-metrics.py-5.bg-light
+  .container
+    %h2.text-center.mb-5 Real-World Performance Metrics
+    
+    .row
+      .col-md-3.text-center.mb-4
+        .bg-white.p-4.rounded.shadow-sm
+          %h3.display-4.text-primary.mb-2 300+
+          %p.lead.mb-0 Indian Cities Supported
+          %small.text-muted Complete GPS coordinate mapping
+      
+      .col-md-3.text-center.mb-4
+        .bg-white.p-4.rounded.shadow-sm
+          %h3.display-4.text-success.mb-2= "< 10s"
+          %p.lead.mb-0 API Response Time
+          %small.text-muted With graceful fallback systems
+      
+      .col-md-3.text-center.mb-4
+        .bg-white.p-4.rounded.shadow-sm
+          %h3.display-4.text-warning.mb-2 100%
+          %p.lead.mb-0 Test Coverage
+          %small.text-muted Comprehensive unit & integration tests
+      
+      .col-md-3.text-center.mb-4
+        .bg-white.p-4.rounded.shadow-sm
+          %h3.display-4.text-info.mb-2 24/7
+          %p.lead.mb-0 Service Availability
+          %small.text-muted High-availability architecture
+
+.getting-started.py-5
+  .container
+    %h2.text-center.mb-5 Experience the Power
+    
+    .row.justify-content-center
+      .col-md-8.text-center
+        %p.lead.mb-4
+          Discover how fast-mcp gem and SerpAPI integration deliver intelligent business insights and real-time travel data.
+        
+        .d-grid.gap-2.d-md-flex.justify-content-md-center
+          %a.btn.btn-primary.btn-lg.me-md-2{href: "/analytics"} View Analytics Dashboard
+          %a.btn.btn-success.btn-lg.me-md-2{href: "/hotels"} Search Hotels
+          %a.btn.btn-info.btn-lg{href: "/flights"} Find Flights
 .why-mcp.py-5
   .container
     %h2.text-center.mb-5 Why MCP Makes Us Different
@@ -74,10 +357,14 @@
         %p.lead
           MCP understands business context and relationships:
         %ul.list-unstyled
-          %li.mb-2 🔄 Cross-references between orders, products, and customers
-          %li.mb-2 🎯 Intelligent pattern recognition in sales data
-          %li.mb-2 📊 Automated correlation discovery
-          %li.mb-0 🤖 Self-improving query understanding
+          %li.mb-2 
+            🔄 Cross-references between orders, products, and customers
+          %li.mb-2 
+            🎯 Intelligent pattern recognition in sales data
+          %li.mb-2 
+            📊 Automated correlation discovery
+          %li.mb-0 
+            🤖 Self-improving query understanding
 
 .future-scope.bg-light.py-5
   .container

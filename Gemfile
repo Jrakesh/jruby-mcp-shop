@@ -11,6 +11,7 @@ gem "json"
 gem "rack-session"
 gem "rackup"
 gem "jar-dependencies", "0.4.1" # Pin to the already activated version
+gem "serpapi"
 
 # Database tools
 gem "rake"

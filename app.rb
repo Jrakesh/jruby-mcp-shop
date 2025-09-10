@@ -4,6 +4,7 @@ require 'haml'
 require 'json'
 require 'securerandom'
 require_relative 'lib/ecommerce_mcp'
+require_relative 'lib/serpapi_service'
 
 configure do
   enable :sessions
@@ -14,7 +15,21 @@ configure do
   set :bind, '0.0.0.0'
   set :port, 3000
   enable :logging, :dump_errors, :raise_errors
+  enable :static
+  
+  # Configure MIME types for static files
+  mime_type :png, 'image/png'
+  mime_type :jpg, 'image/jpeg'
+  mime_type :jpeg, 'image/jpeg'
+  mime_type :gif, 'image/gif'
+  mime_type :svg, 'image/svg+xml'
+  mime_type :css, 'text/css'
+  mime_type :js, 'application/javascript'
 
+  # SerpAPI Configuration - Set your API key here
+  # Get your API key from: https://serpapi.com/manage-api-key
+  ENV['SERPAPI_API_KEY'] ||= 'your_serpapi_key_here_placeholder'
+  
   # Database configuration
   DB = Sequel.connect(
     adapter: 'jdbc',
@@ -402,5 +417,85 @@ get '/analytics/export/:format' do
     AnalyticsController.generate_json(data)
   else
     halt 400, "Unsupported format"
+  end
+end
+
+# SerpAPI routes
+get '/hotels-restaurants' do
+  @title = "Hotels & Restaurants"
+  haml :hotels_restaurants
+end
+
+get '/flights' do
+  @title = "Flight Search"
+  haml :flights
+end
+
+# SerpAPI endpoints
+post '/api/search/hotels-restaurants' do
+  content_type :json
+  
+  begin
+    # Read request body without rewind for JRuby compatibility
+    body_content = request.body.read
+    request_payload = JSON.parse(body_content)
+    
+    location = request_payload['location']
+    search_type = request_payload['search_type'] || 'hotels and restaurants'
+    
+    unless location && !location.strip.empty?
+      return { error: "Location is required" }.to_json
+    end
+    
+    serpapi = SerpApiService.new
+    results = serpapi.search_hotels_restaurants(location, search_type)
+    
+    results.to_json
+  rescue JSON::ParserError => e
+    puts "[ERROR] Invalid JSON in hotels/restaurants request: #{e.message}"
+    { error: "Invalid request format" }.to_json
+  rescue => e
+    puts "[ERROR] Hotels/Restaurants search error: #{e.message}"
+    puts e.backtrace.join("\n")
+    { error: "Search failed: #{e.message}" }.to_json
+  end
+end
+
+post '/api/search/flights' do
+  content_type :json
+  
+  begin
+    # Read request body without rewind for JRuby compatibility
+    body_content = request.body.read
+    request_payload = JSON.parse(body_content)
+    
+    origin = request_payload['origin']
+    destination = request_payload['destination']
+    departure_date = request_payload['departure_date']
+    return_date = request_payload['return_date']
+    
+    unless origin && destination && departure_date
+      return { error: "Origin, destination, and departure date are required" }.to_json
+    end
+    
+    # Validate date format
+    begin
+      Date.parse(departure_date)
+      Date.parse(return_date) if return_date && !return_date.empty?
+    rescue ArgumentError
+      return { error: "Invalid date format. Use YYYY-MM-DD" }.to_json
+    end
+    
+    serpapi = SerpApiService.new
+    results = serpapi.search_flights(origin, destination, departure_date, return_date)
+    
+    results.to_json
+  rescue JSON::ParserError => e
+    puts "[ERROR] Invalid JSON in flights request: #{e.message}"
+    { error: "Invalid request format" }.to_json
+  rescue => e
+    puts "[ERROR] Flight search error: #{e.message}"
+    puts e.backtrace.join("\n")
+    { error: "Search failed: #{e.message}" }.to_json
   end
 end

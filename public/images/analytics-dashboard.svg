@@ -1,0 +1,40 @@
+<svg width="600" height="400" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1f2937;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#374151;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="600" height="400" fill="url(#bg)"/>
+  
+  <!-- Dashboard elements -->
+  <rect x="50" y="50" width="500" height="300" fill="#111827" rx="10"/>
+  
+  <!-- Chart area -->
+  <rect x="80" y="80" width="440" height="200" fill="#1f2937" rx="5"/>
+  
+  <!-- Mock chart bars -->
+  <rect x="120" y="200" width="30" height="60" fill="#60a5fa"/>
+  <rect x="170" y="180" width="30" height="80" fill="#34d399"/>
+  <rect x="220" y="160" width="30" height="100" fill="#f59e0b"/>
+  <rect x="270" y="140" width="30" height="120" fill="#ef4444"/>
+  <rect x="320" y="120" width="30" height="140" fill="#8b5cf6"/>
+  <rect x="370" y="190" width="30" height="70" fill="#06b6d4"/>
+  <rect x="420" y="170" width="30" height="90" fill="#84cc16"/>
+  
+  <!-- Title -->
+  <text x="300" y="40" text-anchor="middle" fill="#f9fafb" font-family="Arial, sans-serif" font-size="24" font-weight="bold">Analytics Dashboard</text>
+  
+  <!-- Legend -->
+  <circle cx="100" cy="320" r="6" fill="#60a5fa"/>
+  <text x="115" y="325" fill="#f9fafb" font-family="Arial, sans-serif" font-size="12">Sales</text>
+  
+  <circle cx="180" cy="320" r="6" fill="#34d399"/>
+  <text x="195" y="325" fill="#f9fafb" font-family="Arial, sans-serif" font-size="12">Revenue</text>
+  
+  <circle cx="260" cy="320" r="6" fill="#f59e0b"/>
+  <text x="275" y="325" fill="#f9fafb" font-family="Arial, sans-serif" font-size="12">Orders</text>
+  
+  <circle cx="340" cy="320" r="6" fill="#ef4444"/>
+  <text x="355" y="325" fill="#f9fafb" font-family="Arial, sans-serif" font-size="12">Customers</text>
+</svg>

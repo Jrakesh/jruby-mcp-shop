@@ -1,0 +1,39 @@
+<svg width="500" height="300" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="mcpBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1f2937;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#60a5fa;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="500" height="300" fill="url(#mcpBg)"/>
+  
+  <!-- MCP Flow diagram -->
+  <circle cx="100" cy="150" r="40" fill="#374151" stroke="#60a5fa" stroke-width="3"/>
+  <text x="100" y="155" text-anchor="middle" fill="#f9fafb" font-family="Arial, sans-serif" font-size="12" font-weight="bold">Input</text>
+  
+  <path d="M140 150 L180 150" stroke="#60a5fa" stroke-width="3" marker-end="url(#arrowhead)"/>
+  
+  <rect x="180" y="120" width="80" height="60" fill="#374151" stroke="#60a5fa" stroke-width="3" rx="10"/>
+  <text x="220" y="145" text-anchor="middle" fill="#f9fafb" font-family="Arial, sans-serif" font-size="10" font-weight="bold">MCP</text>
+  <text x="220" y="160" text-anchor="middle" fill="#f9fafb" font-family="Arial, sans-serif" font-size="10" font-weight="bold">Processing</text>
+  
+  <path d="M260 150 L300 150" stroke="#60a5fa" stroke-width="3" marker-end="url(#arrowhead)"/>
+  
+  <circle cx="340" cy="150" r="40" fill="#374151" stroke="#60a5fa" stroke-width="3"/>
+  <text x="340" y="155" text-anchor="middle" fill="#f9fafb" font-family="Arial, sans-serif" font-size="12" font-weight="bold">Output</text>
+  
+  <!-- Arrow marker -->
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#60a5fa"/>
+    </marker>
+  </defs>
+  
+  <!-- Title -->
+  <text x="250" y="50" text-anchor="middle" fill="#f9fafb" font-family="Arial, sans-serif" font-size="18" font-weight="bold">MCP Processing Flow</text>
+  
+  <!-- Context indicators -->
+  <text x="100" y="200" text-anchor="middle" fill="#f9fafb" font-family="Arial, sans-serif" font-size="10">Natural Language</text>
+  <text x="220" y="200" text-anchor="middle" fill="#f9fafb" font-family="Arial, sans-serif" font-size="10">Context Analysis</text>
+  <text x="340" y="200" text-anchor="middle" fill="#f9fafb" font-family="Arial, sans-serif" font-size="10">Structured Data</text>
+</svg>
